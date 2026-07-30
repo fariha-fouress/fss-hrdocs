@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% block title %}New document · HR Document Generator{% endblock %}
+{% block content %}
+<h1>Generate an HR document</h1>
+<form id="genform" method="post" action="{{ url_for('main.generate') }}" class="card">
+
+  <div class="grid">
+    <label>Document type
+      <select name="doc_type" id="doc_type" required>
+        <option value="offer_letter">Offer Letter (employee)</option>
+        <option value="service_agreement">Service Agreement (contractor)</option>
+        <option value="ncnda">NCNDA</option>
+      </select>
+    </label>
+
+    <label>Entity
+      <select name="entity" id="entity" required>
+        {% for key, label in entities %}
+          <option value="{{ key }}" data-currency="{{ entity_currency[key] }}">{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label id="employment_wrap" style="display:none">Party type (NCNDA)
+      <select name="employment" id="employment">
+        <option value="employee">Employee</option>
+        <option value="contractor">Service Provider (contractor)</option>
+      </select>
+    </label>
+
+    <label>Signatory
+      <select name="signatory" required>
+        {% for key, s in signatories.items() %}
+          <option value="{{ key }}">{{ s.name }} — {{ s.designation }}</option>
+        {% endfor %}
+      </select>
+    </label>
+  </div>
+
+  <div class="grid">
+    <label>Candidate name
+      <input type="text" name="candidate" id="candidate" required placeholder="Full name">
+    </label>
+    <label>Job title <span class="hint">(fills the Job Responsibilities annexure)</span>
+      <select name="job_title_key" id="job_title_key">
+        <option value="">— select a job title —</option>
+        <optgroup label="Roles (with job description)">
+          {% for k, t in jd_specific %}<option value="{{ k }}">{{ t }}</option>{% endfor %}
+        </optgroup>
+        <optgroup label="Generic roles (same duties)">
+          {% for k, t in jd_generic %}<option value="{{ k }}">{{ t }}</option>{% endfor %}
+        </optgroup>
+        <option value="{{ jd_custom }}">Other — enter a custom title…</option>
+      </select>
+      <input type="text" name="role_custom" id="role_custom" placeholder="Type the job title"
+             style="display:none; margin-top:6px">
+    </label>
+    <label>Passport no. <span class="hint">(required for NCNDA)</span>
+      <input type="text" name="passport" placeholder="e.g. S9704562">
+    </label>
+  </div>
+
+  <div class="grid" id="pay_row">
+    <label id="pay_amount_wrap"><span id="pay_label">Salary (per month)</span>
+      <input type="text" name="pay_amount" placeholder="e.g. 6000 (Six Thousand)">
+    </label>
+    <label>Currency
+      <input type="text" name="pay_currency" id="pay_currency" placeholder="AED">
+    </label>
+    <label>Start date / date of joining
+      <input type="date" name="start_date">
+    </label>
+  </div>
+
+  <div class="grid">
+    <label>Probation terms
+      <input type="text" name="probation" placeholder="e.g. sixty (60) days">
+    </label>
+    <label>Reporting manager
+      <input type="text" name="reporting_manager" placeholder="e.g. Head of Sales">
+    </label>
+    <label>Territory / market <span class="hint">(sets the NCNDA Restricted Territory)</span>
+      <input type="text" name="territory" placeholder="e.g. Vietnam / South Korea / Middle East &amp; Africa">
+    </label>
+  </div>
+
+  <div class="grid">
+    <label>Work location
+      <input type="text" name="work_location" placeholder="Office / city">
+    </label>
+    <label>Work arrangement
+      <div class="toggle" id="work_toggle">
+        <input type="radio" name="work_mode" value="onsite" id="wm_onsite" checked>
+        <label for="wm_onsite">Onsite</label>
+        <input type="radio" name="work_mode" value="remote" id="wm_remote">
+        <label for="wm_remote">Remote</label>
+      </div>
+    </label>
+    <label>Document date
+      <input type="date" name="letter_date" value="{{ today }}">
+    </label>
+  </div>
+
+  <div class="grid" id="ncnda_row" style="display:none">
+    <label>Agreement date (NCNDA)
+      <input type="date" name="agreement_date" value="{{ today }}">
+    </label>
+  </div>
+
+  <fieldset class="annex-picker">
+    <legend>Annexures (choose 0–5)</legend>
+    <p class="hint">Suggested annexures are pre-selected. The Job Responsibilities annexure is
+      auto-filled from the chosen job title; all content stays editable in the next step, and
+      the acknowledgement block is added automatically.</p>
+    {% for c in annex_catalogue %}
+      <div class="annex-row">
+        <label class="annex-check">
+          <input type="checkbox" name="annex" value="{{ c.kind }}"
+                 data-sales-only="{{ '1' if c.get('sales_only') else '0' }}"
+                 class="annex-cb">
+          <span>{{ c.title }}</span>
+        </label>
+        <input type="text" name="annex_title_{{ c.kind }}" value="{{ c.title }}"
+               class="annex-title" placeholder="Annexure title">
+      </div>
+    {% endfor %}
+  </fieldset>
+
+  <button class="btn" type="submit">Generate &amp; preview →</button>
+</form>
+
+{% if recent %}
+<section class="card">
+  <h2>Recent documents</h2>
+  <table class="list">
+    <thead><tr><th>When</th><th>Type</th><th>Candidate</th><th>Entity</th><th>By</th><th>Status</th></tr></thead>
+    <tbody>
+      {% for r in recent %}
+      <tr>
+        <td>{{ r['created_at'] }}</td>
+        <td>{{ r['doc_type'] }}</td>
+        <td>{{ r['candidate'] }}</td>
+        <td>{{ r['entity_label'] }}</td>
+        <td>{{ r['created_by'] }}</td>
+        <td>{{ r['status'] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  const docType = document.getElementById('doc_type');
+  const entity = document.getElementById('entity');
+  const cur = document.getElementById('pay_currency');
+  const payLabel = document.getElementById('pay_label');
+  const payWrap = document.getElementById('pay_amount_wrap');
+  const empWrap = document.getElementById('employment_wrap');
+  const ncndaRow = document.getElementById('ncnda_row');
+  const jobSel = document.getElementById('job_title_key');
+  const roleCustom = document.getElementById('role_custom');
+
+  function syncCurrency() {
+    const opt = entity.options[entity.selectedIndex];
+    if (opt && !cur.dataset.touched) cur.value = opt.dataset.currency || '';
+  }
+  cur.addEventListener('input', () => { cur.dataset.touched = '1'; });
+  entity.addEventListener('change', () => { cur.dataset.touched=''; syncCurrency(); });
+
+  function syncDocType() {
+    const t = docType.value;
+    empWrap.style.display = (t === 'ncnda') ? '' : 'none';
+    ncndaRow.style.display = (t === 'ncnda') ? '' : 'none';
+    payWrap.style.display = (t === 'ncnda') ? 'none' : '';
+    payLabel.textContent = (t === 'service_agreement') ? 'Service fee (per month)' : 'Salary (per month)';
+  }
+  docType.addEventListener('change', syncDocType);
+
+  // current job title text (selected option label, or the custom field)
+  function currentTitle() {
+    if (jobSel.value === '{{ jd_custom }}') return roleCustom.value || '';
+    return jobSel.options[jobSel.selectedIndex] ? jobSel.options[jobSel.selectedIndex].text : '';
+  }
+  function syncSalesAnnex() {
+    const isSales = /sales|business development|marketing/i.test(currentTitle());
+    document.querySelectorAll('.annex-cb').forEach(cb => {
+      if (cb.dataset.salesOnly === '1' && !cb.dataset.touched) cb.checked = isSales;
+    });
+  }
+  function syncCustom() {
+    roleCustom.style.display = (jobSel.value === '{{ jd_custom }}') ? '' : 'none';
+    if (jobSel.value === '{{ jd_custom }}') roleCustom.focus();
+  }
+  jobSel.addEventListener('change', () => { syncCustom(); syncSalesAnnex(); });
+  roleCustom.addEventListener('input', syncSalesAnnex);
+  document.querySelectorAll('.annex-cb').forEach(cb =>
+    cb.addEventListener('change', () => { cb.dataset.touched = '1'; }));
+
+  ['responsibilities','policy','tech_security'].forEach(k => {
+    const cb = document.querySelector('.annex-cb[value="'+k+'"]');
+    if (cb) cb.checked = true;
+  });
+
+  syncCurrency(); syncDocType(); syncCustom(); syncSalesAnnex();
+})();
+</script>
+{% endblock %}

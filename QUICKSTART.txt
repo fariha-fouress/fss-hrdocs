@@ -1,0 +1,19 @@
+QUICK START — password login, no Zoho
+======================================
+
+1. Install Docker Desktop (one-time).
+
+2. Open a terminal in this folder and run:
+       docker compose up --build
+
+3. Open http://localhost:5000
+
+4. Log in with any email listed in AUTHORIZED_EMAILS and the LOCAL_PASSWORD,
+   both set in docker-compose.yml. Edit those two lines to set your 4 users
+   and a shared password, then re-run step 2.
+
+To share the running app with remote meeting attendees, in a second terminal:
+       docker run --rm --network host cloudflare/cloudflared:latest tunnel --url http://localhost:5000
+   ...and share the https://<name>.trycloudflare.com link it prints.
+
+To stop:  Ctrl+C, then  docker compose down

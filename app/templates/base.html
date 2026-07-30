@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}HR Document Generator{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="topbar">
+    <div class="brandmark">FSS · HR Document Generator</div>
+    <nav>
+      {% if session.get('user_email') %}
+        <a href="{{ url_for('main.dashboard') }}">New document</a>
+        <a href="{{ url_for('main.audit') }}">Audit log</a>
+        <span class="who">{{ session.get('user_email') }}</span>
+        <a class="btn-sm" href="{{ url_for('auth.logout') }}">Sign out</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  <main class="wrap">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="flash flash-{{ cat }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

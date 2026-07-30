@@ -1,0 +1,31 @@
+# One-command run:  docker compose up --build
+# Then open http://localhost:5000 and log in with an email + password below.
+services:
+  hrdocs:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      SECRET_KEY: "change-this-to-something-random"
+      AUTH_MODE: "password"          # simple email + shared password (no Zoho OAuth)
+
+      # ===== USERS + PASSWORD (edit) =====
+      AUTHORIZED_EMAILS: "user1@fouressynergy.com,user2@fouressynergy.com,user3@fouressynergy.com,user4@fouressynergy.com"
+      LOCAL_PASSWORD: "CHANGE_ME_before_deploy"
+      # ===================================
+
+      # ===== DOWNLOAD-NOTIFICATION EMAIL via Zoho SMTP (edit) =====
+      EMAIL_ENABLED: "true"
+      SMTP_HOST: "smtp.zoho.com"     # .in / .eu / .com.au / .jp if your Zoho is on that data centre
+      SMTP_PORT: "465"
+      SMTP_USE_SSL: "true"
+      SMTP_USERNAME: "hr@fouressynergy.com"     # a real Zoho mailbox to send FROM
+      SMTP_PASSWORD: "PASTE_ZOHO_APP_SPECIFIC_PASSWORD"
+      MAIL_FROM: "hr@fouressynergy.com"
+      MAIL_FROM_NAME: "HR Document Generator"
+      MANAGEMENT_EMAILS: "admin@fouressynergy.com"   # who gets notified on every PDF download
+      # ===========================================================
+
+      PAGE_SIZE: "A4"
+    volumes:
+      - ./data:/srv/data

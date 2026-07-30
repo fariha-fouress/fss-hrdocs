@@ -1,0 +1,107 @@
+/* ==========================================================================
+   document.css — the letterhead + document styling.
+   Loaded by BOTH the browser preview and the WeasyPrint PDF renderer so the
+   PDF is pixel-faithful to the on-screen preview.
+   ========================================================================== */
+
+:root { --accent: #e08b1e; --ink: #1a1a1a; --muted: #555; }
+.brand-fouress { --accent: #e08b1e; }
+.brand-estel   { --accent: #1f7a6d; }
+
+/* ---- page geometry (PDF) ----
+   Small side margins so the banner sits near edge-to-edge; the generous top
+   margin leaves room for the full-width masthead banner. */
+@page {
+    size: A4;
+    margin: 50mm 14mm 22mm 14mm;
+    @top-center    { content: element(running-header); }
+    @bottom-center { content: element(running-footer); }
+    @bottom-right  {
+        content: "Page " counter(page) " of " counter(pages);
+        font: 7pt "Calibri", Arial, sans-serif; color: #999;
+    }
+}
+
+/* ---- letterhead header (the real masthead banner) / footer ---- */
+.letterhead-header { text-align: center; }
+/* full content width, small margin each end, height scales to match as-is */
+.lh-band { display: block; width: 182mm; height: auto; max-height: 46mm; margin: 0 auto; }
+
+.letterhead-footer {
+    border-top: 1px solid var(--accent);
+    padding-top: 4px; margin-top: 6px;
+    font: 6.5pt "Calibri", Arial, sans-serif; color: var(--muted);
+    text-align: center;
+}
+#running-header { position: running(running-header); }
+#running-footer { position: running(running-footer); }
+
+/* ---- document body ---- */
+#document, .doc-shell {
+    font-family: "Calibri", "Segoe UI", Arial, sans-serif;
+    font-size: 10.5pt; line-height: 1.46; color: var(--ink);
+}
+#document h2, #document h3 { color: var(--accent); margin: 14px 0 6px; }
+#document h2 { font-size: 13pt; }
+#document h3 { font-size: 11pt; }
+#document h2.doc-title { text-align: center; letter-spacing: .5px; margin-top: 4px; }
+#document p { margin: 6px 0; }
+#document ul { margin: 4px 0 8px 18px; }
+#document li { margin: 2px 0; }
+.subtitle { text-align: center; font-style: italic; color: var(--muted); margin-top: -4px; }
+
+.term { margin: 5px 0; }
+.term-n { display: inline-block; min-width: 20px; font-weight: 700; }
+.term-title { margin: 8px 0 2px; }
+
+/* compensation table */
+.comp-table { border-collapse: collapse; width: 100%; margin: 4px 0 10px; }
+.comp-table th, .comp-table td {
+    border: 1px solid #bbb; padding: 5px 8px; font-size: 10pt; text-align: left;
+}
+.comp-table th { background: #f2f2f2; }
+
+/* signature block */
+.sig-table { width: 100%; border-collapse: collapse; margin-top: 18px;
+             page-break-inside: avoid; }
+.sig-table td.sig-cell { width: 50%; vertical-align: top; padding: 10px 12px;
+                         border: 1px solid #ccc; }
+.sig-head { margin-bottom: 12px; }
+.sig-line { margin-top: 20px; }
+
+/* annexures — each starts a new page in the PDF */
+section.annex { break-before: page; page-break-before: always; padding-top: 4px; }
+.annex-lawline { font-weight: 700; color: var(--accent); }
+.annex-ack { margin-top: 18px; padding-top: 8px; border-top: 1px dashed #999;
+             page-break-inside: avoid; }
+
+/* ---- editor affordances (screen only; suppressed in print) ---- */
+.doc-region { position: relative; }
+.doc-region.editable:hover { outline: 1px dashed #b9c6d6; }
+.doc-region.editable:focus { outline: 2px solid #3b82f6; background: #f8fbff; }
+.doc-region.locked {
+    background: repeating-linear-gradient(45deg,#faf7f0,#faf7f0 10px,#f5efe3 10px,#f5efe3 20px);
+    border-left: 3px solid var(--accent);
+    padding: 4px 8px; margin: 6px 0;
+}
+.doc-region.locked::before {
+    content: "🔒 Locked compliance clause — cannot be edited or removed";
+    display: block; font: 700 7.5pt "Calibri",Arial,sans-serif;
+    color: var(--accent); margin-bottom: 3px; text-transform: uppercase;
+    letter-spacing: .4px;
+}
+
+@media print {
+    .doc-region.editable:hover, .doc-region.editable:focus { outline: none; background: none; }
+    .doc-region.locked { background: none; border-left: none; padding: 0; margin: 6px 0; }
+    .doc-region.locked::before { display: none; }
+}
+
+/* NCNDA parties table (plain-document format) */
+.parties-table { border-collapse: collapse; width: 100%; margin: 6px 0 12px; }
+.parties-table td { border: 1px solid #999; padding: 6px 9px; vertical-align: top; font-size: 10pt; }
+.parties-table td.pt-key { width: 26%; font-weight: 700; background: #f4f4f4; }
+
+/* plain documents (NCNDA) use neutral black headings like the samples */
+.plain #document h2, .plain #document h3 { color: #1a1a1a; }
+.plain #document h2.doc-title { color: #000; }

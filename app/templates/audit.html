@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Audit log · HR Document Generator{% endblock %}
+{% block content %}
+<h1>Audit log</h1>
+<p class="muted">Every generation, download and notification is recorded here.</p>
+<section class="card">
+  <table class="list">
+    <thead><tr>
+      <th>Timestamp</th><th>Actor</th><th>Action</th><th>Type</th>
+      <th>Candidate</th><th>Entity</th><th>Detail</th>
+    </tr></thead>
+    <tbody>
+      {% for r in rows %}
+      <tr class="a-{{ r['action'] }}">
+        <td>{{ r['ts'] }}</td>
+        <td>{{ r['actor_email'] }}</td>
+        <td><span class="tag">{{ r['action'] }}</span></td>
+        <td>{{ r['doc_type'] or '' }}</td>
+        <td>{{ r['candidate'] or '' }}</td>
+        <td>{{ r['entity_label'] or '' }}</td>
+        <td class="detail">{{ r['detail'] or '' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

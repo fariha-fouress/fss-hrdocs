@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} · Preview{% endblock %}
+{% block head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/document.css') }}">
+{% endblock %}
+{% block content %}
+<div class="preview-head">
+  <div>
+    <h1>{{ title }}</h1>
+    <p class="muted">Edit any non-locked text below, then download. Locked
+      compliance clauses cannot be changed or removed.</p>
+  </div>
+  <a href="{{ url_for('main.dashboard') }}" class="btn-sm">← Start over</a>
+</div>
+
+<div class="toolbar" id="toolbar">
+  <button type="button" data-cmd="bold"><b>B</b></button>
+  <button type="button" data-cmd="italic"><i>I</i></button>
+  <button type="button" data-cmd="underline"><u>U</u></button>
+  <button type="button" data-cmd="insertUnorderedList">• List</button>
+  <button type="button" data-cmd="insertOrderedList">1. List</button>
+  <span class="tb-sep"></span>
+  <button type="button" class="btn primary" id="dl-pdf">⬇ Download PDF</button>
+  <button type="button" class="btn" id="dl-docx">⬇ Download Word (.docx)</button>
+  <span id="status" class="tb-status"></span>
+</div>
+
+<div id="errbox" class="flash flash-error" style="display:none"></div>
+
+<div class="paper {{ brand_class }}{% if not letterhead %} plain{% endif %}">
+  {{ header_html|safe }}
+  <div class="doc-shell"><div id="document">{{ body_html|safe }}</div></div>
+  {{ footer_html|safe }}
+</div>
+
+<script>
+  window.HRDOC = {
+    docId: {{ doc_id }},
+    requiredTags: {{ required_tags|safe }},
+    filename: "{{ filename_stub }}",
+    downloadUrl: "{{ url_for('main.download', doc_id=doc_id, fmt='FMT') }}"
+  };
+</script>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/editor.js') }}"></script>
+{% endblock %}

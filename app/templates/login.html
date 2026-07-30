@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Sign in · HR Document Generator{% endblock %}
+{% block content %}
+<div class="login-card">
+  <h1>Sign in</h1>
+  {% if mode == 'password' %}
+    <p class="muted">Authorised users only. Sign in with your company email.</p>
+    <form method="post">
+      <label>Email
+        <input type="email" name="email" required autofocus placeholder="you@fouressynergy.com">
+      </label>
+      <label>Password
+        <input type="password" name="password" required>
+      </label>
+      <button class="btn" type="submit">Sign in</button>
+    </form>
+  {% elif mode == 'misconfigured' %}
+    <p class="flash flash-error">Zoho sign-in is selected but not configured. Set
+    ZOHO_CLIENT_ID / ZOHO_CLIENT_SECRET in your environment, or set
+    AUTH_MODE=password.</p>
+  {% else %}
+    <p class="muted">Sign in with your Zoho (company) account.</p>
+    <a class="btn" href="{{ url_for('auth.login') }}">Sign in with Zoho</a>
+  {% endif %}
+</div>
+{% endblock %}
