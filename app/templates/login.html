@@ -14,6 +14,23 @@
       </label>
       <button class="btn" type="submit">Sign in</button>
     </form>
+
+    <div class="adduser">
+      <details>
+        <summary>Authorise a new user</summary>
+        <p class="muted">Add a new email to the authorised list. Requires the shared
+          password; the new user then signs in with that same password.</p>
+        <form method="post" action="{{ url_for('auth.authorize') }}">
+          <label>New user email
+            <input type="email" name="new_email" required placeholder="newperson@fouressynergy.com">
+          </label>
+          <label>Shared password
+            <input type="password" name="auth_password" required>
+          </label>
+          <button class="btn-sm" type="submit">Authorise user</button>
+        </form>
+      </details>
+    </div>
   {% elif mode == 'misconfigured' %}
     <p class="flash flash-error">Zoho sign-in is selected but not configured. Set
     ZOHO_CLIENT_ID / ZOHO_CLIENT_SECRET in your environment, or set

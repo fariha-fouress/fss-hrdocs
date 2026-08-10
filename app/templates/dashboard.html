@@ -44,12 +44,16 @@
     <label>Job title <span class="hint">(fills the Job Responsibilities annexure)</span>
       <select name="job_title_key" id="job_title_key">
         <option value="">— select a job title —</option>
-        <optgroup label="Roles (with job description)">
-          {% for k, t in jd_specific %}<option value="{{ k }}">{{ t }}</option>{% endfor %}
-        </optgroup>
-        <optgroup label="Generic roles (same duties)">
-          {% for k, t in jd_generic %}<option value="{{ k }}">{{ t }}</option>{% endfor %}
-        </optgroup>
+        {% for cat, items in jd_groups %}
+          <optgroup label="{{ cat }}">
+            {% for k, t in items %}<option value="{{ k }}">{{ t }}</option>{% endfor %}
+          </optgroup>
+        {% endfor %}
+        {% if jd_saved %}
+          <optgroup label="Saved custom roles">
+            {% for k, t in jd_saved %}<option value="{{ k }}">{{ t }}</option>{% endfor %}
+          </optgroup>
+        {% endif %}
         <option value="{{ jd_custom }}">Other — enter a custom title…</option>
       </select>
       <input type="text" name="role_custom" id="role_custom" placeholder="Type the job title"
@@ -67,7 +71,7 @@
     <label>Currency
       <input type="text" name="pay_currency" id="pay_currency" placeholder="AED">
     </label>
-    <label>Start date / date of joining
+    <label>Expected start date
       <input type="date" name="start_date">
     </label>
   </div>
@@ -94,6 +98,8 @@
         <label for="wm_onsite">Onsite</label>
         <input type="radio" name="work_mode" value="remote" id="wm_remote">
         <label for="wm_remote">Remote</label>
+        <input type="radio" name="work_mode" value="hybrid" id="wm_hybrid">
+        <label for="wm_hybrid">Hybrid</label>
       </div>
     </label>
     <label>Document date
@@ -163,6 +169,7 @@
   const ncndaRow = document.getElementById('ncnda_row');
   const jobSel = document.getElementById('job_title_key');
   const roleCustom = document.getElementById('role_custom');
+  const CUSTOM = '{{ jd_custom }}';
 
   function syncCurrency() {
     const opt = entity.options[entity.selectedIndex];
@@ -180,9 +187,8 @@
   }
   docType.addEventListener('change', syncDocType);
 
-  // current job title text (selected option label, or the custom field)
   function currentTitle() {
-    if (jobSel.value === '{{ jd_custom }}') return roleCustom.value || '';
+    if (jobSel.value === CUSTOM) return roleCustom.value || '';
     return jobSel.options[jobSel.selectedIndex] ? jobSel.options[jobSel.selectedIndex].text : '';
   }
   function syncSalesAnnex() {
@@ -192,8 +198,8 @@
     });
   }
   function syncCustom() {
-    roleCustom.style.display = (jobSel.value === '{{ jd_custom }}') ? '' : 'none';
-    if (jobSel.value === '{{ jd_custom }}') roleCustom.focus();
+    roleCustom.style.display = (jobSel.value === CUSTOM) ? '' : 'none';
+    if (jobSel.value === CUSTOM) roleCustom.focus();
   }
   jobSel.addEventListener('change', () => { syncCustom(); syncSalesAnnex(); });
   roleCustom.addEventListener('input', syncSalesAnnex);

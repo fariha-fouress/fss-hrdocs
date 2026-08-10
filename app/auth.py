@@ -1,11 +1,8 @@
-"""
-Authentication.
+"""Authentication: Zoho OAuth or local shared-password, gated by an allowlist.
 
-Two modes, selected by AUTH_MODE:
-  * "zoho"     -> Zoho OAuth 2.0 / OIDC ("Sign in with Zoho"). Recommended.
-  * "password" -> a single shared password + email allowlist. For dev/first run.
-
-In BOTH modes the signed-in email must be in AUTHORIZED_EMAILS (the 4 users).
+The allowlist is the AUTHORIZED_EMAILS env seed PLUS any emails added at runtime
+via the login page (stored in the DB). Adding a new authorised user requires the
+shared password, so only insiders can do it.
 """
 import hmac
 import secrets
@@ -16,7 +13,7 @@ import requests
 from flask import (Blueprint, current_app, redirect, render_template, request,
                    session, url_for, flash)
 
-from .db import log_audit
+from .db import log_audit, add_authorized_email, list_authorized_emails
 
 bp = Blueprint("auth", __name__)
 
@@ -26,7 +23,15 @@ def current_user():
 
 
 def is_authorized(email):
-    return bool(email) and email.strip().lower() in current_app.config["AUTHORIZED_EMAILS"]
+    if not email:
+        return False
+    email = email.strip().lower()
+    if email in current_app.config["AUTHORIZED_EMAILS"]:
+        return True
+    try:
+        return email in list_authorized_emails()
+    except Exception:
+        return False
 
 
 def login_required(view):
@@ -45,7 +50,6 @@ def _complete_login(email):
     log_audit(email, "LOGIN")
 
 
-# --------------------------------------------------------------------------
 @bp.route("/login", methods=["GET", "POST"])
 def login():
     if current_user():
@@ -53,7 +57,6 @@ def login():
 
     mode = current_app.config["AUTH_MODE"]
 
-    # ---- Zoho OAuth mode -------------------------------------------------
     if mode == "zoho":
         if not current_app.config["ZOHO_CLIENT_ID"]:
             flash("AUTH_MODE=zoho but ZOHO_CLIENT_ID is not configured.", "error")
@@ -73,7 +76,6 @@ def login():
                     + "/oauth/v2/auth?" + urllib.parse.urlencode(params))
         return redirect(auth_url)
 
-    # ---- Local password mode --------------------------------------------
     if request.method == "POST":
         email = (request.form.get("email") or "").strip().lower()
         password = request.form.get("password") or ""
@@ -86,6 +88,22 @@ def login():
             nxt = request.args.get("next") or url_for("main.dashboard")
             return redirect(nxt)
     return render_template("login.html", mode="password")
+
+
+@bp.route("/authorize", methods=["POST"])
+def authorize():
+    """Add a new authorised email. Gated by the shared password."""
+    email = (request.form.get("new_email") or "").strip().lower()
+    password = request.form.get("auth_password") or ""
+    if "@" not in email or "." not in email:
+        flash("Enter a valid email address.", "error")
+    elif not hmac.compare_digest(password, current_app.config["LOCAL_PASSWORD"]):
+        flash("Incorrect shared password — only someone with it can authorise a new user.", "error")
+    else:
+        add_authorized_email(email, added_by=current_user() or "self-service")
+        log_audit(current_user() or email, "AUTHORIZED_USER", detail=email)
+        flash(f"{email} is now authorised and can sign in with the shared password.", "success")
+    return redirect(url_for("auth.login"))
 
 
 @bp.route("/auth/callback")

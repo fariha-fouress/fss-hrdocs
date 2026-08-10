@@ -7,7 +7,8 @@ from flask import (Blueprint, current_app, render_template, request, redirect,
 
 from .auth import login_required, current_user
 from .db import (save_document, get_document, update_document_body, log_audit,
-                 recent_audit, recent_documents)
+                 recent_audit, recent_documents, list_custom_jds, get_custom_jd,
+                 add_custom_jd)
 from .documents.builder import build, DOC_TITLES
 from .documents.entities import (entity_choices, get_entity, SIGNATORIES,
                                   ENTITIES, ENTITY_ORDER)
@@ -18,6 +19,31 @@ from .documents.compliance import validate, sanitize
 from .emailer import send_download_notification
 
 bp = Blueprint("main", __name__)
+
+
+def _capture_custom_jd(form, body_html):
+    """If this doc used a brand-new custom job title, save its (edited) Job
+    Responsibilities so the title becomes reusable next time."""
+    if form.get("job_key"):
+        return
+    role = (form.get("role") or "").strip()
+    if not role or form.get("doc_type") not in ("offer_letter", "service_agreement"):
+        return
+    known = {t.lower() for _, t in jd.specific_choices()} | {t.lower() for _, t in jd.generic_choices()}
+    if role.lower() in known:
+        return
+    try:
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(body_html, "html.parser")
+        block = soup.select_one('.annex-body[data-jd-kind="responsibilities"] .doc-region')
+        if block is None:
+            return
+        html = block.decode_contents().strip()
+        if len(html) > 40:
+            add_custom_jd(role, html, current_user())
+    except Exception:
+        pass
+
 
 
 @bp.route("/")
@@ -35,8 +61,8 @@ def dashboard():
         entity_currency=entity_currency,
         signatories=SIGNATORIES,
         annex_catalogue=annex.ANNEXURE_CATALOGUE,
-        jd_specific=jd.specific_choices(),
-        jd_generic=jd.generic_choices(),
+        jd_groups=jd.grouped_choices(),
+        jd_saved=[("saved::" + r["title"], r["title"]) for r in list_custom_jds()],
         jd_custom=jd.CUSTOM_VALUE,
         today=date.today().isoformat(),
         recent=recent_documents(10),
@@ -46,14 +72,20 @@ def dashboard():
 def _parse_form():
     f = request.form
     doc_type = f.get("doc_type")
-    # job title: a library pick (specific/generic) fills responsibilities; "Other" -> custom text
+    # job title -> role + (optional) responsibilities html
     jtk = f.get("job_title_key", "")
-    if jtk and jtk != jd.CUSTOM_VALUE:
-        role_val = jd.get_title(jtk)
-        job_key = jtk
-    else:
+    resp_html = None
+    if not jtk or jtk == jd.CUSTOM_VALUE:
         role_val = f.get("role_custom", "").strip() or f.get("role", "").strip()
         job_key = ""
+    elif jtk.startswith("saved::"):
+        role_val = jtk[len("saved::"):]
+        resp_html = get_custom_jd(role_val)
+        job_key = jtk
+    else:
+        role_val = jd.get_title(jtk) or f.get("role_custom", "").strip()
+        resp_html = jd.get_html(jtk)
+        job_key = jtk
     employment = f.get("employment") or (
         "contractor" if doc_type == "service_agreement" else "employee")
     selected = f.getlist("annex")
@@ -71,6 +103,7 @@ def _parse_form():
         "candidate": f.get("candidate", "").strip(),
         "role": role_val,
         "job_key": job_key,
+        "responsibilities_html": resp_html,
         "employment": employment,
         "pay_amount": f.get("pay_amount", "").strip(),
         "pay_currency": f.get("pay_currency", "").strip(),
@@ -141,6 +174,7 @@ def download(doc_id, fmt):
         return jsonify({"ok": False, "errors": errors}), 422
 
     update_document_body(doc_id, posted, status="finalised")
+    _capture_custom_jd(form, posted)
     filename = f"{built['filename_stub']}.{fmt}"
 
     if fmt == "pdf":

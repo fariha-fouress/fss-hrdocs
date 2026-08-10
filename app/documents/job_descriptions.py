@@ -116,3 +116,58 @@ def specific_choices():
 
 def generic_choices():
     return [(k, v[0]) for k, v in GENERIC_TITLES.items()]
+
+
+CATEGORY_ORDER = ["Sales", "Marketing", "Engineering", "Finance", "Procurement", "CRM & Scrum"]
+
+CATEGORIES = {
+    "international_domestic_sales_manager_polymers": "Sales",
+    "polymer_indenting_manager_bangkok_thailand_remot": "Sales",
+    "sales_executive_manager_rice_sugar_mena_region": "Sales",
+    "sales_executive_e_commerce": "Sales",
+    "sales_executive_polymers_african_markets": "Sales",
+    "sales_specialist_polymer_trading": "Sales",
+    "senior_sales_marketing_expert_polymers_africa_ba": "Marketing",
+    "junior_accountant": "Finance",
+    "junior_purchase_coordinator": "Procurement",
+    "procurement_vendor_management_executive_rice_sug": "Procurement",
+    "junior_software_development_engineer": "Engineering",
+    "technical_assistant_python_sql_ai": "Engineering",
+    "junior_crm_associate_analyst": "CRM & Scrum",
+    "sales_scrum_master_crm_coordinator": "CRM & Scrum",
+    "generic_sales_executive": "Sales",
+    "generic_senior_sales_executive": "Sales",
+    "generic_sales_manager": "Sales",
+    "generic_bd_executive": "Sales",
+    "generic_bd_manager": "Sales",
+    "generic_polymer_sales": "Sales",
+    "generic_indenting_manager": "Sales",
+    "generic_ecommerce_sales": "Sales",
+    "generic_commodity_sales": "Sales",
+    "generic_sales_marketing": "Marketing",
+    "generic_marketing_executive": "Marketing",
+    "generic_software_engineer": "Engineering",
+    "generic_software_developer": "Engineering",
+    "generic_technical_assistant": "Engineering",
+    "generic_data_ai_assistant": "Engineering",
+    "generic_accountant": "Finance",
+    "generic_accounts_executive": "Finance",
+    "generic_finance_associate": "Finance",
+    "generic_purchase_coordinator": "Procurement",
+    "generic_procurement_executive": "Procurement",
+    "generic_vendor_management": "Procurement",
+    "generic_crm_analyst": "CRM & Scrum",
+    "generic_crm_associate": "CRM & Scrum",
+    "generic_scrum_master": "CRM & Scrum",
+}
+
+
+def grouped_choices():
+    """Return [(category, [(value, label), ...]), ...] — specific roles first, then generic."""
+    groups = []
+    for cat in CATEGORY_ORDER:
+        items = [(k, JD_LIBRARY[k]["title"]) for k in SPECIFIC_ORDER if CATEGORIES.get(k) == cat]
+        items += [(k, v[0]) for k, v in GENERIC_TITLES.items() if CATEGORIES.get(k) == cat]
+        if items:
+            groups.append((cat, items))
+    return groups

@@ -17,7 +17,6 @@ from datetime import date
 
 from .entities import get_entity, get_signatory
 from . import annexures as annex
-from . import job_descriptions as jd
 from .render_blocks import (editable, locked, esc, h, p, numbered_term,
                             compensation_table, signature_block,
                             acknowledgement_block, ROMAN)
@@ -109,8 +108,8 @@ def _render_annexures(form, ent, person_noun, pay_noun, pay_noun_cap):
         roman = ROMAN[i]
         kind = a.get("kind", "blank")
         title = a.get("title") or annex.default_title(kind, person_noun == "Service Provider")
-        if kind == "responsibilities" and form.get("job_key"):
-            body = a.get("body") or jd.get_html(form["job_key"]) or annex.body_html(kind, ctx)
+        if kind == "responsibilities" and form.get("responsibilities_html"):
+            body = a.get("body") or form["responsibilities_html"]
         else:
             body = a.get("body") or annex.body_html(kind, ctx)
         ack = acknowledgement_block(candidate, roman, title, person_noun)
@@ -118,7 +117,7 @@ def _render_annexures(form, ent, person_noun, pay_noun, pay_noun_cap):
         section = (
             f'<section class="annex" data-annex="{i}">'
             + f'<div class="annex-head">{editable(h(f"Annexure {roman} — {title}", 2))}</div>'
-            + f'<div class="annex-body">{editable(body)}</div>'
+            + f'<div class="annex-body" data-jd-kind="{kind}">{editable(body)}</div>'
             + ack
             + '</section>'
         )
@@ -154,7 +153,7 @@ def _offer_letter(form, ent):
     terms.append(editable(numbered_term(2, "Reporting Office", esc(loc))))
     if form.get("territory"):
         terms.append(editable(numbered_term(3, "Territory", esc(form["territory"]))))
-    terms.append(editable(numbered_term(4, "Date of Joining",
+    terms.append(editable(numbered_term(4, "Expected Date of Joining",
                                         esc(form.get("start_date") or "[start date]"))))
     if form.get("reporting_manager"):
         terms.append(editable(numbered_term(5, "Reporting Manager", esc(form["reporting_manager"]))))

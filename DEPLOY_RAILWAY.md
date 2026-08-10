@@ -48,5 +48,5 @@ Then set the Variables (step 3 above) in the dashboard, and Generate Domain.
 
 ## Optional — keep the in-app audit log across restarts
 Not required (management emails are your record). If you also want the in-app
-Audit page to persist: Railway → service → add a **Volume** mounted at `/srv/data`
+Audit page, added authorised users, and saved custom roles to persist: Railway → service → add a **Volume** mounted at `/srv/data`
 (the app already writes the SQLite DB there via DB_PATH=/srv/data/hrdocs.db).

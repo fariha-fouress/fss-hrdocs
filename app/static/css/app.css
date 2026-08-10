@@ -86,3 +86,8 @@ tr.a-EMAIL_FAILED .tag { background: #fdecec; color: #a12626; }
   .grid { grid-template-columns: 1fr; }
   .annex-row { grid-template-columns: 1fr; }
 }
+
+/* login: authorise-new-user block */
+.adduser { margin-top: 18px; border-top: 1px solid #e2e6ee; padding-top: 12px; }
+.adduser summary { cursor: pointer; font-weight: 700; color: #b45f06; }
+.adduser form { margin-top: 10px; }
