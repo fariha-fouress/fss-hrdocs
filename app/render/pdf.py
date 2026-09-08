@@ -47,8 +47,3 @@ def render_pdf(entity_key, body_html, page_size="A4", letterhead=True):
     ent = get_entity(entity_key)
     html = _shell(ent, body_html, page_size, letterhead)
     return HTML(string=html).write_pdf()
-
-
-def render_preview_document(entity_key, body_html, letterhead=True):
-    ent = get_entity(entity_key)
-    return _shell(ent, body_html, letterhead=letterhead)

@@ -48,11 +48,6 @@ def masthead_path(ent):
     return LOGO_DIR / fname if fname else None
 
 
-def has_masthead(ent):
-    p = masthead_path(ent)
-    return bool(p and p.exists())
-
-
 def masthead_data_uri(ent):
     p = masthead_path(ent)
     if not p or not p.exists():

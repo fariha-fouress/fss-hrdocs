@@ -187,18 +187,12 @@ ENTITIES = {
 
 ENTITY_ORDER = ["fss_usa", "fss_hk", "fss_uae", "fss_korea", "estel", "estel_usa"]
 
-
-def get_entity(key):
-    if key not in ENTITIES:
-        raise KeyError(f"Unknown entity '{key}'")
-    return ENTITIES[key]
+# NOTE: these dicts are the FACTORY DEFAULTS only. They are seeded into the
+# database on first run and served at runtime through ``registry.py`` — read
+# entities from there, not from this module.
 
 
 def get_signatory(key):
     if key not in SIGNATORIES:
         raise KeyError(f"Unknown signatory '{key}'")
     return SIGNATORIES[key]
-
-
-def entity_choices():
-    return [(k, ENTITIES[k]["label"]) for k in ENTITY_ORDER]
