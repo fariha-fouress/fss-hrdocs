@@ -4,188 +4,193 @@
 <h1>Generate an HR document</h1>
 <form id="genform" method="post" action="{{ url_for('main.generate') }}" class="card">
 
-  <div class="grid">
-    <label>Document type
-      <select name="doc_type" id="doc_type" required>
-        <option value="offer_letter">Offer Letter (employee)</option>
-        <option value="service_agreement">Service Agreement (contractor)</option>
-        <option value="ncnda">NCNDA</option>
-      </select>
-    </label>
-
-    <label>Entity
-      <select name="entity" id="entity" required>
-        {% for key, label in entities %}
-          <option value="{{ key }}" data-currency="{{ entity_currency[key] }}" data-country="{{ entity_country[key] }}">{{ label }}</option>
-        {% endfor %}
-      </select>
-    </label>
-
-    <label id="employment_wrap" style="display:none">Party type (NCNDA)
-      <select name="employment" id="employment">
-        <option value="employee">Employee</option>
-        <option value="contractor">Service Provider (contractor)</option>
-      </select>
-    </label>
-
-    <label>Signatory
-      <select name="signatory" required>
-        {% for key, s in signatories.items() %}
-          <option value="{{ key }}">{{ s.name }} — {{ s.designation }}</option>
-        {% endfor %}
-      </select>
-    </label>
+  <div class="form-section">
+    <h3>Document</h3>
+    <div class="grid">
+      <label>Document type
+        <select name="doc_type" id="doc_type" required>
+          <option value="offer_letter">Offer Letter (employee)</option>
+          <option value="service_agreement">Service Agreement (contractor)</option>
+          <option value="ncnda">NCNDA</option>
+        </select>
+      </label>
+      <label>Entity
+        <select name="entity" id="entity" required>
+          {% for key, label in entities %}
+            <option value="{{ key }}" data-currency="{{ entity_currency[key] }}" data-country="{{ entity_country[key] }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Signatory
+        <select name="signatory" required>
+          {% for key, s in signatories.items() %}
+            <option value="{{ key }}">{{ s.name }} — {{ s.designation }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    </div>
+    <div class="grid">
+      <label id="employment_wrap" style="display:none">Party type
+        <select name="employment" id="employment">
+          <option value="employee">Employee</option>
+          <option value="contractor">Service Provider (contractor)</option>
+        </select>
+      </label>
+      <label>Document date
+        <input type="date" name="letter_date" value="{{ today }}">
+      </label>
+      <label id="ncnda_row" style="display:none">Agreement date
+        <input type="date" name="agreement_date" value="{{ today }}">
+      </label>
+    </div>
   </div>
 
-  <div class="grid">
-    <label>Candidate name
-      <input type="text" name="candidate" id="candidate" required placeholder="Full name">
-    </label>
-    <label>Job title <span class="hint">(fills the Job Responsibilities annexure)</span>
-      <select name="job_title_key" id="job_title_key">
-        <option value="">— select a job title —</option>
-        {% for cat, items in jd_groups %}
-          <optgroup label="{{ cat }}">
-            {% for k, t in items %}<option value="{{ k }}">{{ t }}</option>{% endfor %}
-          </optgroup>
-        {% endfor %}
-        {% if jd_saved %}
-          <optgroup label="Saved custom roles">
-            {% for k, t in jd_saved %}<option value="{{ k }}">{{ t }}</option>{% endfor %}
-          </optgroup>
-        {% endif %}
-        <option value="{{ jd_custom }}">Other — custom</option>
-      </select>
-      <input type="text" name="role_custom" id="role_custom" placeholder="Type the job title"
-             style="display:none; margin-top:6px">
-    </label>
-    <label>Passport no. <span class="hint">(required for NCNDA)</span>
-      <input type="text" name="passport" placeholder="e.g. S9704562">
-    </label>
+  <div class="form-section">
+    <h3>Candidate &amp; role</h3>
+    <div class="grid">
+      <label>Candidate name
+        <input type="text" name="candidate" id="candidate" required>
+      </label>
+      <label>Job title <span class="hint">(fills Job Responsibilities)</span>
+        <select name="job_title_key" id="job_title_key">
+          <option value="">— select a job title —</option>
+          {% for cat, items in jd_groups %}
+            <optgroup label="{{ cat }}">
+              {% for k, t in items %}<option value="{{ k }}">{{ t }}</option>{% endfor %}
+            </optgroup>
+          {% endfor %}
+          {% if jd_saved %}
+            <optgroup label="Saved custom roles">
+              {% for k, t in jd_saved %}<option value="{{ k }}">{{ t }}</option>{% endfor %}
+            </optgroup>
+          {% endif %}
+          <option value="{{ jd_custom }}">Other — custom</option>
+        </select>
+        <input type="text" name="role_custom" id="role_custom" style="display:none; margin-top:6px">
+      </label>
+      <label>Passport no. <span class="hint">(required for NCNDA)</span>
+        <input type="text" name="passport">
+      </label>
+    </div>
   </div>
 
-  <div class="grid" id="pay_row">
-    <label id="pay_amount_wrap"><span id="pay_label">Salary (per month)</span>
-      <input type="text" name="pay_amount" placeholder="e.g. 6000 (Six Thousand)">
-    </label>
-    <label>Currency <span class="hint">(required)</span>
-      <input type="text" name="pay_currency" id="pay_currency" placeholder="AED" required>
-    </label>
-    <label>Expected start date
-      <input type="date" name="start_date">
-    </label>
+  <div class="form-section" id="pay_section">
+    <h3>Compensation</h3>
+    <div class="grid" id="pay_row">
+      <label id="pay_amount_wrap"><span id="pay_label">Salary (per month)</span>
+        <input type="text" name="pay_amount">
+      </label>
+      <label>Currency <span class="hint">(required)</span>
+        <input type="text" name="pay_currency" id="pay_currency" required>
+      </label>
+      <label>Expected start date
+        <input type="date" name="start_date">
+      </label>
+    </div>
+    <div class="grid">
+      <label>Expected salary
+        <input type="text" name="expected_salary">
+      </label>
+      <label>Current salary
+        <input type="text" name="current_salary">
+      </label>
+      <label>Current notice period (in days)
+        <input type="text" name="notice_period_days">
+      </label>
+    </div>
   </div>
 
-  <div class="grid">
-    <label>Probation terms
-      <input type="text" name="probation" placeholder="e.g. sixty (60) days">
-    </label>
-    <label>Reporting manager
-      <input type="text" name="reporting_manager" placeholder="e.g. Head of Sales">
-    </label>
-    <label>Territory / market <span class="hint">(sets the NCNDA Restricted Territory)</span>
-      <select name="territory" id="territory">
-        <option value="">— select a territory / market —</option>
-        <option>Vietnam</option>
-        <option>Singapore</option>
-        <option>Malaysia</option>
-        <option>Thailand</option>
-        <option>Indonesia</option>
-        <option>Philippines</option>
-        <option>Southeast Asia</option>
-        <option>South Korea</option>
-        <option>Japan</option>
-        <option>Greater China (China, Hong Kong, Taiwan)</option>
-        <option>East Asia</option>
-        <option>Middle East</option>
-        <option>Africa</option>
-        <option>Middle East &amp; Africa</option>
-        <option>South Asia</option>
-        <option>North America</option>
-        <option>Europe</option>
-        <option value="__custom__">Other — custom</option>
-      </select>
-      <input type="text" name="territory_custom" id="territory_custom" placeholder="Type the territory / market"
-             style="display:none; margin-top:6px">
-    </label>
+  <div class="form-section">
+    <h3>Placement &amp; terms</h3>
+    <div class="grid">
+      <label>Work location
+        <input type="text" name="work_location">
+      </label>
+      <label>Work arrangement
+        <div class="toggle" id="work_toggle">
+          <input type="radio" name="work_mode" value="onsite" id="wm_onsite" checked>
+          <label for="wm_onsite">Onsite</label>
+          <input type="radio" name="work_mode" value="remote" id="wm_remote">
+          <label for="wm_remote">Remote</label>
+          <input type="radio" name="work_mode" value="hybrid" id="wm_hybrid">
+          <label for="wm_hybrid">Hybrid</label>
+        </div>
+      </label>
+      <label>Policy location <span class="hint">(Company Policy annexure)</span>
+        <select name="policy_location" id="policy_location">
+          {% for k, l in policy_locations %}<option value="{{ k }}">{{ l }}</option>{% endfor %}
+        </select>
+      </label>
+    </div>
+    <div class="grid">
+      <label>Reporting manager
+        <input type="text" name="reporting_manager">
+      </label>
+      <label>Probation terms
+        <input type="text" name="probation">
+      </label>
+      <label>Territory / market <span class="hint">(sets NCNDA territory)</span>
+        <select name="territory" id="territory">
+          <option value="">— select a territory / market —</option>
+          <option>Vietnam</option>
+          <option>Singapore</option>
+          <option>Malaysia</option>
+          <option>Thailand</option>
+          <option>Indonesia</option>
+          <option>Philippines</option>
+          <option>Southeast Asia</option>
+          <option>South Korea</option>
+          <option>Japan</option>
+          <option>Greater China (China, Hong Kong, Taiwan)</option>
+          <option>East Asia</option>
+          <option>Middle East</option>
+          <option>Africa</option>
+          <option>Middle East &amp; Africa</option>
+          <option>South Asia</option>
+          <option>North America</option>
+          <option>Europe</option>
+          <option value="__custom__">Other — custom</option>
+        </select>
+        <input type="text" name="territory_custom" id="territory_custom" style="display:none; margin-top:6px">
+      </label>
+    </div>
   </div>
 
-  <div class="grid">
-    <label>Work location
-      <input type="text" name="work_location" placeholder="Office / city">
-    </label>
-    <label>Policy location <span class="hint">(sets the Company Policy annexure)</span>
-      <select name="policy_location" id="policy_location">
-        {% for k, l in policy_locations %}<option value="{{ k }}">{{ l }}</option>{% endfor %}
-      </select>
-    </label>
-    <label>Work arrangement
-      <div class="toggle" id="work_toggle">
-        <input type="radio" name="work_mode" value="onsite" id="wm_onsite" checked>
-        <label for="wm_onsite">Onsite</label>
-        <input type="radio" name="work_mode" value="remote" id="wm_remote">
-        <label for="wm_remote">Remote</label>
-        <input type="radio" name="work_mode" value="hybrid" id="wm_hybrid">
-        <label for="wm_hybrid">Hybrid</label>
-      </div>
-    </label>
-    <label>Document date
-      <input type="date" name="letter_date" value="{{ today }}">
-    </label>
-  </div>
-
-  <div class="grid">
-    <label>Industry
-      <select name="industry" id="industry">
-        <option value="">— select an industry —</option>
-        <option>Petrochemical</option>
-        <option>Polymers &amp; Plastics</option>
-        <option>Oil &amp; Gas</option>
-        <option>Energy &amp; Power</option>
-        <option>Renewable Energy</option>
-        <option>Chemicals</option>
-        <option>Agro Commodities</option>
-        <option>Beauty Products</option>
-        <option>Trading &amp; Distribution</option>
-        <option>Manufacturing</option>
-        <option>Engineering &amp; Construction</option>
-        <option>Logistics &amp; Freight</option>
-        <option value="Other">Other — custom</option>
-      </select>
-      <input type="text" name="industry_custom" id="industry_custom" placeholder="Type the industry"
-             style="display:none; margin-top:6px">
-    </label>
-    <label>Product name <span class="hint">(manual entry)</span>
-      <input type="text" name="product_name" placeholder="e.g. Polypropylene (PP)">
-    </label>
-    <label>ID number <span class="hint">(passport / government ID)</span>
-      <input type="text" name="id_number" placeholder="Passport or government ID no.">
-    </label>
-  </div>
-
-  <div class="grid">
-    <label>Current notice period (in days)
-      <input type="text" name="notice_period_days" placeholder="e.g. 30">
-    </label>
-    <label>Expected salary
-      <input type="text" name="expected_salary" placeholder="e.g. 7000">
-    </label>
-    <label>Current salary
-      <input type="text" name="current_salary" placeholder="e.g. 5500">
-    </label>
-  </div>
-
-  <div class="grid" id="ncnda_row" style="display:none">
-    <label>Agreement date (NCNDA)
-      <input type="date" name="agreement_date" value="{{ today }}">
-    </label>
+  <div class="form-section">
+    <h3>Additional details</h3>
+    <div class="grid">
+      <label>Industry
+        <select name="industry" id="industry">
+          <option value="">— select an industry —</option>
+          <option>Petrochemical</option>
+          <option>Polymers &amp; Plastics</option>
+          <option>Oil &amp; Gas</option>
+          <option>Energy &amp; Power</option>
+          <option>Renewable Energy</option>
+          <option>Chemicals</option>
+          <option>Agro Commodities</option>
+          <option>Beauty Products</option>
+          <option>Trading &amp; Distribution</option>
+          <option>Manufacturing</option>
+          <option>Engineering &amp; Construction</option>
+          <option>Logistics &amp; Freight</option>
+          <option value="Other">Other — custom</option>
+        </select>
+        <input type="text" name="industry_custom" id="industry_custom" style="display:none; margin-top:6px">
+      </label>
+      <label>Product name
+        <input type="text" name="product_name">
+      </label>
+      <label>ID number <span class="hint">(passport / government ID)</span>
+        <input type="text" name="id_number">
+      </label>
+    </div>
   </div>
 
   <fieldset class="annex-picker">
     <legend>Annexures (choose 0–5)</legend>
     <p class="hint">Suggested annexures are pre-selected. The Job Responsibilities annexure is
-      auto-filled from the chosen job title; all content stays editable in the next step, and
-      the acknowledgement block is added automatically.</p>
+      auto-filled from the chosen job title; all content stays editable in the next step.</p>
     {% for c in annex_catalogue %}
       <div class="annex-row">
         <label class="annex-check">
@@ -195,7 +200,7 @@
           <span>{{ c.title }}</span>
         </label>
         <input type="text" name="annex_title_{{ c.kind }}" value="{{ c.title }}"
-               class="annex-title" placeholder="Annexure title">
+               class="annex-title">
       </div>
     {% endfor %}
   </fieldset>

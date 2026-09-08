@@ -21,8 +21,14 @@ h2 { font-size: 17px; }
 .card { background: #fff; border: 1px solid #dfe3ea; border-radius: 10px;
         padding: 18px 20px; margin-bottom: 20px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
 
-.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 6px; }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px 18px; margin-bottom: 14px; }
+.grid:last-child { margin-bottom: 0; }
 label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 8px; }
+
+.form-section { padding: 18px 0 6px; border-top: 1px solid #eef1f5; }
+.form-section:first-of-type { padding-top: 4px; border-top: none; }
+.form-section > h3 { margin: 0 0 14px; font-size: 12px; font-weight: 700; letter-spacing: .6px;
+  text-transform: uppercase; color: #9099a8; }
 input[type=text], input[type=email], input[type=password], input[type=date],
 select, textarea {
   width: 100%; padding: 8px 10px; margin-top: 4px; border: 1px solid #cbd2dc;
