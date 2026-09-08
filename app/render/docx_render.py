@@ -10,10 +10,14 @@ from docx import Document
 from docx.shared import Pt, Inches, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
-from ..documents.entities import get_entity
+from ..documents.registry import get_entity
 from ..documents import letterhead as lh
 
 ACCENT = {"fouress": RGBColor(0xE0, 0x8B, 0x1E), "estel": RGBColor(0x1F, 0x7A, 0x6D)}
+
+
+def _accent_for(ent):
+    return ACCENT.get(ent.get("brand", "fouress"), ACCENT["fouress"])
 
 
 def _add_inline(paragraph, node, bold=False, italic=False):
@@ -128,7 +132,7 @@ def _setup_letterhead(doc, ent, accent, letterhead=True):
 
 def render_docx(entity_key, body_html, letterhead=True):
     ent = get_entity(entity_key)
-    accent = ACCENT[ent["brand"]]
+    accent = _accent_for(ent)
     doc = Document()
     style = doc.styles["Normal"]
     style.font.name = "Calibri"

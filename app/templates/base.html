@@ -13,6 +13,7 @@
     <nav>
       {% if session.get('user_email') %}
         <a href="{{ url_for('main.dashboard') }}">New document</a>
+        <a href="{{ url_for('locations.index') }}">Locations</a>
         <a href="{{ url_for('main.audit') }}">Audit log</a>
         <span class="who">{{ session.get('user_email') }}</span>
         <a class="btn-sm" href="{{ url_for('auth.logout') }}">Sign out</a>

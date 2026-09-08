@@ -15,7 +15,7 @@ Compliance guards applied at finalise time, before any PDF/DOCX is produced.
 """
 import re
 
-from .entities import get_entity
+from .registry import get_entity
 
 _SCRIPT_RE = re.compile(r"<script\b[^>]*>.*?</script\s*>", re.I | re.S)
 _ON_ATTR_RE = re.compile(r'\son\w+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)', re.I)

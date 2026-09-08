@@ -6,7 +6,7 @@ margins, matching the supplied sample NCNDAs.
 """
 from pathlib import Path
 
-from ..documents.entities import get_entity
+from ..documents.registry import get_entity
 from ..documents import letterhead as lh
 
 CSS_PATH = Path(__file__).resolve().parent.parent / "static" / "css" / "document.css"

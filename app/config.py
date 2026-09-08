@@ -19,8 +19,13 @@ def _emails(raw):
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-change-me")
 
-    # --- Database -------------------------------------------------------
-    DB_PATH = os.environ.get("DB_PATH", str(PROJECT_DIR / "data" / "hrdocs.db"))
+    # --- Storage --------------------------------------------------------
+    # DATA_DIR holds the SQLite database and uploaded files (letterheads).
+    # On Railway, attach a persistent Volume and set DATA_DIR=/data so that
+    # added locations and their uploads survive redeploys.
+    DATA_DIR = os.environ.get("DATA_DIR", str(PROJECT_DIR / "data"))
+    DB_PATH = os.environ.get("DB_PATH", str(Path(DATA_DIR) / "hrdocs.db"))
+    UPLOAD_DIR = os.environ.get("UPLOAD_DIR", str(Path(DATA_DIR) / "uploads"))
 
     # --- Authorisation --------------------------------------------------
     # The 4 authorised users. Only these emails may sign in.

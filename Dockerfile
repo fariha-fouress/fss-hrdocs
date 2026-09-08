@@ -11,7 +11,10 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
-ENV DB_PATH=/srv/data/hrdocs.db
+# DATA_DIR is where the SQLite DB and uploaded letterheads live. Point it at a
+# mounted persistent volume (e.g. Railway Volume at /data) so user-added
+# locations and uploads survive redeploys. Defaults to /data.
+ENV DATA_DIR=/data
 EXPOSE 5000
 # Binds to the host-assigned port: Railway/Render $PORT, else Zoho Catalyst's
 # variable, else 5000 (VPS/local). Works unchanged everywhere.

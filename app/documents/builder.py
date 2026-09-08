@@ -15,9 +15,8 @@ Returns a dict:
 import re
 from datetime import date
 
-from .entities import get_entity, get_signatory
+from .registry import get_entity, get_signatory, policy_html
 from . import annexures as annex
-from . import policy_handbooks as ph
 from .render_blocks import (editable, locked, esc, h, p, numbered_term,
                             compensation_table, signature_block,
                             acknowledgement_block, ROMAN)
@@ -57,6 +56,22 @@ def _probation(form, default="sixty (60) days"):
     if not val:
         return default
     return f"{val} days" if val.isdigit() else val
+
+
+def _extra_clauses(ent, doc_type):
+    """Location-specific extra clauses (e.g. a country's overtime rule) that the
+    Locations admin page attached for this document type. Rendered as editable
+    blocks so they can still be tweaked in the preview."""
+    out = []
+    for c in (ent.get("extra_clauses") or []):
+        applies = c.get("doc") or "all"
+        if applies not in ("all", doc_type):
+            continue
+        title = esc(c.get("title") or "Additional Clause")
+        body = c.get("body") or ""
+        out.append(editable(
+            f'<p><strong>{title}.</strong> {body}</p>'))
+    return "".join(out)
 
 
 def build(form):
@@ -122,8 +137,8 @@ def _render_annexures(form, ent, person_noun, pay_noun, pay_noun_cap):
             body = a.get("body") or form["responsibilities_html"]
         elif kind == "policy" and form.get("policy_location"):
             body = (a.get("body")
-                    or ph.get_policy_html(form["policy_location"], ctx,
-                                          form.get("policy_location_label"))
+                    or policy_html(form["policy_location"], ctx,
+                                   form.get("policy_location_label"))
                     or annex.body_html(kind, ctx))
         else:
             body = a.get("body") or annex.body_html(kind, ctx)
@@ -242,7 +257,8 @@ def _offer_letter(form, ent):
     annex_html, annex_tags = _render_annexures(form, ent, "Employee", "salary", "Salary")
     tags += annex_tags
 
-    body = (f'<section class="main">{header}{"".join(terms)}{closing}{sigblock}</section>'
+    extra = _extra_clauses(ent, "offer_letter")
+    body = (f'<section class="main">{header}{"".join(terms)}{extra}{closing}{sigblock}</section>'
             + annex_html)
     return {"title": DOC_TITLES["offer_letter"], "body_html": body, "required_tags": tags}
 
@@ -353,7 +369,8 @@ def _service_agreement(form, ent):
                                                "service fee", "Service Fee")
     tags += annex_tags
 
-    body = (f'<section class="main">{header}{"".join(terms)}{closing}{sigblock}</section>'
+    extra = _extra_clauses(ent, "service_agreement")
+    body = (f'<section class="main">{header}{"".join(terms)}{extra}{closing}{sigblock}</section>'
             + annex_html)
     return {"title": DOC_TITLES["service_agreement"], "body_html": body,
             "required_tags": tags}
@@ -566,6 +583,7 @@ def _ncnda(form, ent):
         comp="SIGNATURE")
     tags.append("SIGNATURE")
 
+    extra = _extra_clauses(ent, "ncnda")
     body = (f'<section class="main">{parties}{recitals}{nda}{noncompete}{territory}'
-            f'{activities}{general}{governing}{acknowledgment}{execution}</section>')
+            f'{activities}{general}{governing}{acknowledgment}{extra}{execution}</section>')
     return {"title": DOC_TITLES["ncnda"], "body_html": body, "required_tags": tags}

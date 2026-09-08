@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if mode=='edit' else 'Add' }} location · HR Document Generator{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>{{ 'Edit location: ' + loc.label if mode=='edit' else 'Add a location' }}</h1>
+  <a class="btn-sm" href="{{ url_for('locations.index') }}">← Back to locations</a>
+</div>
+
+{% if loc.is_system %}
+<p class="flash flash-info">This is a built-in location. You can edit everything here; the core
+compliance clauses are still applied automatically and can't be removed.</p>
+{% endif %}
+
+<form method="post" action="{{ url_for('locations.save') }}" enctype="multipart/form-data" class="card">
+  <input type="hidden" name="mode" value="{{ mode }}">
+  {% if mode=='edit' %}<input type="hidden" name="key" value="{{ loc.key }}">{% endif %}
+
+  <div class="form-section">
+    <h3>Basics</h3>
+    <div class="grid">
+      <label>Location name <span class="req">*</span>
+        <input type="text" name="label" value="{{ loc.label }}" required>
+      </label>
+      <label>Brand
+        <select name="brand">
+          <option value="fouress" {{ 'selected' if loc.brand=='fouress' }}>Fouress</option>
+          <option value="estel" {{ 'selected' if loc.brand=='estel' }}>Estel (independent)</option>
+          <option value="other" {{ 'selected' if loc.brand not in ['fouress','estel'] }}>Other</option>
+        </select>
+      </label>
+      <label>Default currency
+        <input type="text" name="currency" value="{{ loc.currency }}">
+      </label>
+    </div>
+    {% if mode=='edit' %}
+    <p class="hint">Internal ID: <code>{{ loc.key }}</code> (fixed). A new location gets an ID from its name automatically.</p>
+    {% endif %}
+  </div>
+
+  <div class="form-section">
+    <h3>Letterhead</h3>
+    <div class="lh-editrow">
+      <div class="lh-current">
+        {% if loc.letterhead_ref %}
+          <img src="{{ url_for('locations.letterhead_media', key=loc.key) }}" alt="current letterhead" class="lh-preview">
+        {% else %}
+          <div class="lh-empty muted">No letterhead yet</div>
+        {% endif %}
+      </div>
+      <label>Upload a new letterhead image <span class="hint">(PNG or JPG — used as the page banner)</span>
+        <input type="file" name="letterhead_file" accept="image/*">
+      </label>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <h3>Legal identity</h3>
+    <div class="grid">
+      <label>Legal name (on documents)
+        <input type="text" name="legal_name" value="{{ loc.legal_name }}">
+      </label>
+      <label>Tagline <span class="hint">(optional)</span>
+        <input type="text" name="tagline" value="{{ loc.tagline }}">
+      </label>
+    </div>
+    <div class="grid">
+      <label>Address lines <span class="hint">(one per line)</span>
+        <textarea name="address_lines" rows="3">{{ loc.address_text }}</textarea>
+      </label>
+      <label>Contact line <span class="hint">(email / phone / IDs on the footer)</span>
+        <textarea name="contact_line" rows="3">{{ loc.contact_line }}</textarea>
+      </label>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <h3>Labour law (Company Policy annexure)</h3>
+    <div class="grid">
+      <label>Policy law title
+        <input type="text" name="policy_law_title" value="{{ loc.policy_law_title }}">
+      </label>
+      <label>Governing law (short, used in the closing line)
+        <input type="text" name="policy_law_short" value="{{ loc.policy_law_short }}">
+      </label>
+      <label>Labour-law short name
+        <input type="text" name="policy_law_updates" value="{{ loc.policy_law_updates }}">
+      </label>
+    </div>
+  </div>
+
+  <div class="form-section">
+    <h3>NCNDA rules</h3>
+    <div class="grid">
+      <label>Governing law
+        <input type="text" name="ncnda_governing_law" value="{{ loc.ncnda_governing_law }}">
+      </label>
+      <label>Courts / jurisdiction
+        <input type="text" name="ncnda_courts" value="{{ loc.ncnda_courts }}">
+      </label>
+    </div>
+    <label>Default Restricted Territory <span class="hint">(HTML allowed; used when no territory is picked)</span>
+      <textarea name="restricted_territory_html" rows="3">{{ loc.restricted_territory_html }}</textarea>
+    </label>
+  </div>
+
+  <div class="form-section">
+    <h3>Company Policy Handbook</h3>
+    <p class="hint">Import a Word/PDF/text file to fill the box, then edit freely. Use
+      <code>__PERSON__</code> for “Employee/Service Provider”, <code>__PAY__</code> for
+      “salary/service fee”. Leave blank to use the built-in handbook for this country.</p>
+    <label>Import handbook from file <span class="hint">(.docx, .pdf, .txt, .html — optional)</span>
+      <input type="file" name="handbook_file" accept=".docx,.pdf,.txt,.html,.htm">
+    </label>
+    <label>Handbook content
+      <textarea name="handbook_html" rows="12" class="mono">{{ loc.handbook_html }}</textarea>
+    </label>
+  </div>
+
+  <div class="form-section">
+    <h3>Extra clauses <span class="hint">(optional — country-specific rules added to documents)</span></h3>
+    <p class="hint">For example a country's overtime rule. Each clause you fill in is added as an
+      editable paragraph to the document type you choose.</p>
+    {% for i in range(3) %}
+      {% set c = loc.extra_clauses[i] if loc.extra_clauses and loc.extra_clauses|length > i else None %}
+      <div class="grid extra-clause">
+        <label>Applies to
+          <select name="extra_doc_{{ i }}">
+            {% for val, lbl in doc_types %}
+              <option value="{{ val }}" {{ 'selected' if c and c.doc==val }}>{{ lbl }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label>Clause title
+          <input type="text" name="extra_title_{{ i }}" value="{{ c.title if c else '' }}">
+        </label>
+        <label>Clause text
+          <input type="text" name="extra_body_{{ i }}" value="{{ c.body if c else '' }}">
+        </label>
+      </div>
+    {% endfor %}
+  </div>
+
+  <button class="btn" type="submit">{{ 'Save changes' if mode=='edit' else 'Create location' }}</button>
+</form>
+
+{% if mode=='edit' %}
+<section class="card danger-zone">
+  <h2>Delete this location</h2>
+  <p class="muted">This removes “{{ loc.label }}” from the app. Documents already generated are
+    unaffected. To confirm, type the exact name <strong>{{ loc.label }}</strong> below.</p>
+  <form method="post" action="{{ url_for('locations.delete', key=loc.key) }}" class="delete-row">
+    <input type="text" name="confirm_name" placeholder="Type “{{ loc.label }}” to confirm" autocomplete="off">
+    <button class="btn btn-danger" type="submit">Delete location</button>
+  </form>
+</section>
+{% endif %}
+{% endblock %}

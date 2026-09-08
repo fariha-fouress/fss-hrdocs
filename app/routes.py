@@ -10,11 +10,10 @@ from .db import (save_document, get_document, update_document_body, log_audit,
                  recent_audit, recent_documents, list_custom_jds, get_custom_jd,
                  add_custom_jd)
 from .documents.builder import build, DOC_TITLES
-from .documents.entities import (entity_choices, get_entity, SIGNATORIES,
-                                  ENTITIES, ENTITY_ORDER)
+from .documents import registry as reg
+from .documents.registry import entity_choices, get_entity, SIGNATORIES
 from .documents import annexures as annex
 from .documents import job_descriptions as jd
-from .documents import policy_handbooks as ph
 from .documents import letterhead as lh
 from .documents.compliance import validate, sanitize
 from .emailer import send_download_notification
@@ -55,14 +54,12 @@ def index():
 @bp.route("/dashboard")
 @login_required
 def dashboard():
-    entity_currency = {k: ENTITIES[k]["currency"] for k in ENTITY_ORDER}
-    entity_country = {k: ENTITIES[k].get("country", "other") for k in ENTITY_ORDER}
     return render_template(
         "dashboard.html",
         entities=entity_choices(),
-        entity_currency=entity_currency,
-        entity_country=entity_country,
-        policy_locations=ph.POLICY_LOCATIONS,
+        entity_currency=reg.entity_currency_map(),
+        entity_country=reg.entity_country_map(),
+        policy_locations=reg.policy_locations(),
         signatories=SIGNATORIES,
         annex_catalogue=annex.ANNEXURE_CATALOGUE,
         jd_groups=jd.grouped_choices(),
@@ -91,8 +88,13 @@ def _parse_form():
         resp_html = jd.get_html(jtk)
         job_key = jtk
     entity_key = f.get("entity")
-    policy_location = f.get("policy_location", "").strip() or (
-        ENTITIES.get(entity_key, {}).get("country", "") if entity_key else "")
+    entity_country = ""
+    if entity_key:
+        try:
+            entity_country = get_entity(entity_key).get("country", "") or ""
+        except Exception:
+            entity_country = ""
+    policy_location = f.get("policy_location", "").strip() or entity_country
     policy_location_label = (f.get("policy_location_custom", "").strip()
                              if policy_location == "other" else "")
     employment = f.get("employment") or (
@@ -167,7 +169,7 @@ def generate():
         letterhead=lettered,
         brand_class=lh.brand_class(ent),
         header_html=(lh.header_html(ent, url_for(
-            "static", filename=f"logos/{lh.MASTHEAD_FILE[ent['key']]}")) if lettered else ""),
+            "locations.letterhead_media", key=ent["key"])) if lettered else ""),
         footer_html=(lh.footer_html(ent) if lettered else ""),
     )
 

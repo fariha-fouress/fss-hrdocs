@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Locations · HR Document Generator{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Locations</h1>
+  <a class="btn" href="{{ url_for('locations.new') }}">+ Add a location</a>
+</div>
+
+<p class="muted">Each location controls its own letterhead, legal wording and Company Policy
+Handbook. Edit any location to change its details, or add a new country. Core compliance
+clauses (probation, contractor/tax terms, the NCNDA sections and ESTEL brand isolation) are
+applied automatically to every document and cannot be removed here.</p>
+
+<section class="card">
+  <table class="list loc-list">
+    <thead>
+      <tr><th>Letterhead</th><th>Location</th><th>Brand</th><th>Currency</th><th>Handbook</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for l in locations %}
+      <tr>
+        <td class="lh-cell">
+          {% if l.letterhead_ref %}
+            <img class="lh-thumb" src="{{ url_for('locations.letterhead_media', key=l.key) }}" alt="letterhead">
+          {% else %}
+            <span class="muted">—</span>
+          {% endif %}
+        </td>
+        <td>
+          <strong>{{ l.label }}</strong>
+          {% if l.is_system %}<span class="badge badge-system">built-in</span>
+          {% else %}<span class="badge badge-custom">custom</span>{% endif %}
+          <div class="muted small">{{ l.legal_name }}</div>
+        </td>
+        <td>{{ l.brand|capitalize }}</td>
+        <td>{{ l.currency or '—' }}</td>
+        <td>{% if l.handbook_html %}<span class="ok-dot">own handbook</span>{% else %}<span class="muted">country default</span>{% endif %}</td>
+        <td class="right"><a class="btn-sm" href="{{ url_for('locations.edit', key=l.key) }}">Edit</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}

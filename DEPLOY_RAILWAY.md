@@ -46,7 +46,22 @@ Then set the Variables (step 3 above) in the dashboard, and Generate Domain.
   enable the orange proxy after it validates). HTTPS is issued automatically.
 - Add an "Admin Login" menu link on the website → https://admin.fouressynergy.com
 
-## Optional — keep the in-app audit log across restarts
-Not required (management emails are your record). If you also want the in-app
-Audit page, added authorised users, and saved custom roles to persist: Railway → service → add a **Volume** mounted at `/srv/data`
-(the app already writes the SQLite DB there via DB_PATH=/srv/data/hrdocs.db).
+## Persistent storage — REQUIRED for the Locations feature
+The app keeps everything that users add or change — **Locations** (letterheads,
+handbooks, legal rules), added authorised users, saved custom roles, and the
+in-app Audit log — in a SQLite database plus an uploads folder. Railway's normal
+filesystem is wiped on every redeploy, so without a Volume those additions would
+disappear on the next deploy.
+
+Attach a Volume once:
+1. Railway → your service → **Variables** → make sure this is **removed/empty** if
+   present: `DB_PATH` (leave it unset — the app derives it from DATA_DIR).
+2. Railway → your service → **Settings → Volumes → New Volume**.
+   - **Mount path:** `/data`
+   - Save. Railway redeploys with the volume attached.
+3. The Docker image already sets `DATA_DIR=/data`, so the database lands at
+   `/data/hrdocs.db` and uploaded letterheads at `/data/uploads`. If you ever
+   change the mount path, add a matching `DATA_DIR` variable.
+
+That's it — added locations, letterhead uploads and edits now survive every
+redeploy. (The 6 built-in locations are seeded automatically on first run.)
