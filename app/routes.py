@@ -120,7 +120,9 @@ def _parse_form():
         "reporting_manager": f.get("reporting_manager", "").strip(),
         "work_location": f.get("work_location", "").strip(),
         "work_mode": f.get("work_mode", "onsite"),
-        "territory": f.get("territory", "").strip(),
+        "territory": (f.get("territory_custom", "").strip()
+                      if f.get("territory", "").strip() == "__custom__"
+                      else f.get("territory", "").strip()),
         "passport": f.get("passport", "").strip(),
         "industry": (f.get("industry_custom", "").strip() or "Other"
                      if f.get("industry", "").strip() == "Other"

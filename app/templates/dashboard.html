@@ -54,7 +54,7 @@
             {% for k, t in jd_saved %}<option value="{{ k }}">{{ t }}</option>{% endfor %}
           </optgroup>
         {% endif %}
-        <option value="{{ jd_custom }}">Other — enter a custom title…</option>
+        <option value="{{ jd_custom }}">Other — custom</option>
       </select>
       <input type="text" name="role_custom" id="role_custom" placeholder="Type the job title"
              style="display:none; margin-top:6px">
@@ -84,7 +84,29 @@
       <input type="text" name="reporting_manager" placeholder="e.g. Head of Sales">
     </label>
     <label>Territory / market <span class="hint">(sets the NCNDA Restricted Territory)</span>
-      <input type="text" name="territory" placeholder="e.g. Vietnam / South Korea / Middle East &amp; Africa">
+      <select name="territory" id="territory">
+        <option value="">— select a territory / market —</option>
+        <option>Vietnam</option>
+        <option>Singapore</option>
+        <option>Malaysia</option>
+        <option>Thailand</option>
+        <option>Indonesia</option>
+        <option>Philippines</option>
+        <option>Southeast Asia</option>
+        <option>South Korea</option>
+        <option>Japan</option>
+        <option>Greater China (China, Hong Kong, Taiwan)</option>
+        <option>East Asia</option>
+        <option>Middle East</option>
+        <option>Africa</option>
+        <option>Middle East &amp; Africa</option>
+        <option>South Asia</option>
+        <option>North America</option>
+        <option>Europe</option>
+        <option value="__custom__">Other — custom</option>
+      </select>
+      <input type="text" name="territory_custom" id="territory_custom" placeholder="Type the territory / market"
+             style="display:none; margin-top:6px">
     </label>
   </div>
 
@@ -128,7 +150,7 @@
         <option>Manufacturing</option>
         <option>Engineering &amp; Construction</option>
         <option>Logistics &amp; Freight</option>
-        <option value="Other">Other — enter a custom industry…</option>
+        <option value="Other">Other — custom</option>
       </select>
       <input type="text" name="industry_custom" id="industry_custom" placeholder="Type the industry"
              style="display:none; margin-top:6px">
@@ -241,6 +263,15 @@
   }
   industry.addEventListener('change', syncIndustry);
 
+  const territory = document.getElementById('territory');
+  const territoryCustom = document.getElementById('territory_custom');
+  function syncTerritory() {
+    const other = territory.value === '__custom__';
+    territoryCustom.style.display = other ? '' : 'none';
+    if (other) territoryCustom.focus();
+  }
+  territory.addEventListener('change', syncTerritory);
+
   function syncDocType() {
     const t = docType.value;
     empWrap.style.display = (t === 'ncnda') ? '' : 'none';
@@ -275,7 +306,7 @@
     if (cb) cb.checked = true;
   });
 
-  syncCurrency(); syncPolicy(); syncIndustry(); syncDocType(); syncCustom(); syncSalesAnnex();
+  syncCurrency(); syncPolicy(); syncIndustry(); syncTerritory(); syncDocType(); syncCustom(); syncSalesAnnex();
 })();
 </script>
 {% endblock %}
