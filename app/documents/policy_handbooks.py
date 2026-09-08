@@ -19,7 +19,8 @@ POLICY_LOCATIONS = [
     ("vietnam", "Vietnam"),
     ("thailand", "Thailand"),
     ("china", "China"),
-    ("other", "Other / generic"),
+    ("bangladesh", "Bangladesh"),
+    ("other", "Other — custom"),
 ]
 
 
@@ -134,14 +135,25 @@ HANDBOOKS = {
     "china": _standard("China — Labour Contract Law of the PRC",
                        "the Labour Contract Law of the PRC",
                        noncompete_law="the laws of the People's Republic of China"),
+    "bangladesh": _standard("Bangladesh — Bangladesh Labour Act, 2006",
+                            "the Bangladesh Labour Act, 2006",
+                            noncompete_law="the laws of the People's Republic of Bangladesh"),
     "other": _standard("Company Policy Handbook — applicable local labour law",
                        "applicable local labour law",
                        noncompete_law="applicable local law"),
 }
 
 
-def get_policy_html(location, ctx):
-    tpl = HANDBOOKS.get(location)
+def get_policy_html(location, ctx, custom_label=None):
+    """Return the handbook HTML for a policy location. When location is 'other'
+    and a custom label is supplied, the handbook is built for that named
+    jurisdiction so the free-typed location flows into the document."""
+    if location == "other" and custom_label:
+        tpl = _standard(f"{custom_label} — applicable local labour law",
+                        f"the applicable labour law of {custom_label}",
+                        noncompete_law=f"the applicable law of {custom_label}")
+    else:
+        tpl = HANDBOOKS.get(location)
     if not tpl:
         return None
     return (tpl.replace("__PERSON__", ctx.get("person_noun", "Employee"))

@@ -87,17 +87,6 @@
         <input type="date" name="start_date">
       </label>
     </div>
-    <div class="grid">
-      <label>Expected salary
-        <input type="text" name="expected_salary">
-      </label>
-      <label>Current salary
-        <input type="text" name="current_salary">
-      </label>
-      <label>Current notice period (in days)
-        <input type="text" name="notice_period_days">
-      </label>
-    </div>
   </div>
 
   <div class="form-section">
@@ -120,14 +109,16 @@
         <select name="policy_location" id="policy_location">
           {% for k, l in policy_locations %}<option value="{{ k }}">{{ l }}</option>{% endfor %}
         </select>
+        <input type="text" name="policy_location_custom" id="policy_location_custom"
+               style="display:none; margin-top:6px">
       </label>
     </div>
     <div class="grid">
       <label>Reporting manager
         <input type="text" name="reporting_manager">
       </label>
-      <label>Probation terms
-        <input type="text" name="probation">
+      <label>Probation days <span class="hint">(number of days)</span>
+        <input type="text" name="probation" inputmode="numeric">
       </label>
       <label>Territory / market <span class="hint">(sets NCNDA territory)</span>
         <select name="territory" id="territory">
@@ -259,6 +250,15 @@
   policy.addEventListener('change', () => { policy.dataset.touched = '1'; });
   entity.addEventListener('change', syncPolicy);
 
+  const policyCustom = document.getElementById('policy_location_custom');
+  function syncPolicyCustom() {
+    const other = policy.value === 'other';
+    policyCustom.style.display = other ? '' : 'none';
+    if (other) policyCustom.focus();
+  }
+  policy.addEventListener('change', syncPolicyCustom);
+  entity.addEventListener('change', syncPolicyCustom);
+
   const industry = document.getElementById('industry');
   const industryCustom = document.getElementById('industry_custom');
   function syncIndustry() {
@@ -311,7 +311,7 @@
     if (cb) cb.checked = true;
   });
 
-  syncCurrency(); syncPolicy(); syncIndustry(); syncTerritory(); syncDocType(); syncCustom(); syncSalesAnnex();
+  syncCurrency(); syncPolicy(); syncPolicyCustom(); syncIndustry(); syncTerritory(); syncDocType(); syncCustom(); syncSalesAnnex();
 })();
 </script>
 {% endblock %}

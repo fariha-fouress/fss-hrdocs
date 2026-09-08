@@ -93,6 +93,8 @@ def _parse_form():
     entity_key = f.get("entity")
     policy_location = f.get("policy_location", "").strip() or (
         ENTITIES.get(entity_key, {}).get("country", "") if entity_key else "")
+    policy_location_label = (f.get("policy_location_custom", "").strip()
+                             if policy_location == "other" else "")
     employment = f.get("employment") or (
         "contractor" if doc_type == "service_agreement" else "employee")
     selected = f.getlist("annex")
@@ -108,6 +110,7 @@ def _parse_form():
         "doc_type": doc_type,
         "entity": entity_key,
         "policy_location": policy_location,
+        "policy_location_label": policy_location_label,
         "candidate": f.get("candidate", "").strip(),
         "role": role_val,
         "job_key": job_key,
@@ -129,9 +132,6 @@ def _parse_form():
                      else f.get("industry", "").strip()),
         "product_name": f.get("product_name", "").strip(),
         "id_number": f.get("id_number", "").strip(),
-        "notice_period_days": f.get("notice_period_days", "").strip(),
-        "expected_salary": f.get("expected_salary", "").strip(),
-        "current_salary": f.get("current_salary", "").strip(),
         "signatory": f.get("signatory", "swarit"),
         "agreement_date": f.get("agreement_date", "").strip(),
         "letter_date": f.get("letter_date", "").strip() or date.today().isoformat(),

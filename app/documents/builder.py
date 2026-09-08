@@ -50,6 +50,15 @@ def _work_mode_line(form):
     return mode, loc
 
 
+def _probation(form, default="sixty (60) days"):
+    """Probation is entered as a number of days; render it as 'N days'. Falls
+    back to any free text entered, else the default."""
+    val = (form.get("probation") or "").strip()
+    if not val:
+        return default
+    return f"{val} days" if val.isdigit() else val
+
+
 def build(form):
     doc_type = form["doc_type"]
     ent = get_entity(form["entity"])
@@ -112,7 +121,10 @@ def _render_annexures(form, ent, person_noun, pay_noun, pay_noun_cap):
         if kind == "responsibilities" and form.get("responsibilities_html"):
             body = a.get("body") or form["responsibilities_html"]
         elif kind == "policy" and form.get("policy_location"):
-            body = a.get("body") or ph.get_policy_html(form["policy_location"], ctx) or annex.body_html(kind, ctx)
+            body = (a.get("body")
+                    or ph.get_policy_html(form["policy_location"], ctx,
+                                          form.get("policy_location_label"))
+                    or annex.body_html(kind, ctx))
         else:
             body = a.get("body") or annex.body_html(kind, ctx)
         ack = acknowledgement_block(candidate, roman, title, person_noun)
@@ -137,7 +149,7 @@ def _offer_letter(form, ent):
     candidate = form.get("candidate", "")
     role = form.get("role", "[role/title]")
     mode, loc = _work_mode_line(form)
-    probation = form.get("probation") or "sixty (60) days"
+    probation = _probation(form)
     tags = []
 
     header = editable(
@@ -295,7 +307,7 @@ def _service_agreement(form, ent):
         "As per applicable law (please refer to the Service Engagement Policy annexure).")))
     terms.append(editable(numbered_term(
         5, "Probation",
-        f'{esc(form.get("probation") or "Sixty (60) days")} from the date of commencement.')))
+        f'{esc(_probation(form, default="Sixty (60) days"))} from the date of commencement.')))
     terms.append(editable(numbered_term(
         6, "Notice Period",
         "24 hours during probation; 30 calendar days post-probation by either party, or "
