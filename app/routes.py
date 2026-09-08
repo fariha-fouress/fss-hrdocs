@@ -122,7 +122,9 @@ def _parse_form():
         "work_mode": f.get("work_mode", "onsite"),
         "territory": f.get("territory", "").strip(),
         "passport": f.get("passport", "").strip(),
-        "industry": f.get("industry", "").strip(),
+        "industry": (f.get("industry_custom", "").strip() or "Other"
+                     if f.get("industry", "").strip() == "Other"
+                     else f.get("industry", "").strip()),
         "product_name": f.get("product_name", "").strip(),
         "id_number": f.get("id_number", "").strip(),
         "notice_period_days": f.get("notice_period_days", "").strip(),

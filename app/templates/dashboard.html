@@ -123,12 +123,15 @@
         <option>Renewable Energy</option>
         <option>Chemicals</option>
         <option>Agro Commodities</option>
+        <option>Beauty Products</option>
         <option>Trading &amp; Distribution</option>
         <option>Manufacturing</option>
         <option>Engineering &amp; Construction</option>
         <option>Logistics &amp; Freight</option>
-        <option>Other</option>
+        <option value="Other">Other — enter a custom industry…</option>
       </select>
+      <input type="text" name="industry_custom" id="industry_custom" placeholder="Type the industry"
+             style="display:none; margin-top:6px">
     </label>
     <label>Product name <span class="hint">(manual entry)</span>
       <input type="text" name="product_name" placeholder="e.g. Polypropylene (PP)">
@@ -229,6 +232,15 @@
   policy.addEventListener('change', () => { policy.dataset.touched = '1'; });
   entity.addEventListener('change', syncPolicy);
 
+  const industry = document.getElementById('industry');
+  const industryCustom = document.getElementById('industry_custom');
+  function syncIndustry() {
+    const other = industry.value === 'Other';
+    industryCustom.style.display = other ? '' : 'none';
+    if (other) industryCustom.focus();
+  }
+  industry.addEventListener('change', syncIndustry);
+
   function syncDocType() {
     const t = docType.value;
     empWrap.style.display = (t === 'ncnda') ? '' : 'none';
@@ -263,7 +275,7 @@
     if (cb) cb.checked = true;
   });
 
-  syncCurrency(); syncPolicy(); syncDocType(); syncCustom(); syncSalesAnnex();
+  syncCurrency(); syncPolicy(); syncIndustry(); syncDocType(); syncCustom(); syncSalesAnnex();
 })();
 </script>
 {% endblock %}

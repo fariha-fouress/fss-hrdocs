@@ -135,7 +135,7 @@ ENTITIES = {
     "estel": {
         "key": "estel",
         "country": "singapore",
-        "label": "ESTEL Energy",
+        "label": "Estel SG",
         "legal_name": "Estel Energy (SG) Pte. Ltd.",
         "brand": "estel",
         "tagline": "",
