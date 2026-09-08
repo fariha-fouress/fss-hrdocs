@@ -68,8 +68,8 @@
     <label id="pay_amount_wrap"><span id="pay_label">Salary (per month)</span>
       <input type="text" name="pay_amount" placeholder="e.g. 6000 (Six Thousand)">
     </label>
-    <label>Currency
-      <input type="text" name="pay_currency" id="pay_currency" placeholder="AED">
+    <label>Currency <span class="hint">(required)</span>
+      <input type="text" name="pay_currency" id="pay_currency" placeholder="AED" required>
     </label>
     <label>Expected start date
       <input type="date" name="start_date">
@@ -109,6 +109,44 @@
     </label>
     <label>Document date
       <input type="date" name="letter_date" value="{{ today }}">
+    </label>
+  </div>
+
+  <div class="grid">
+    <label>Industry
+      <select name="industry" id="industry">
+        <option value="">— select an industry —</option>
+        <option>Petrochemical</option>
+        <option>Polymers &amp; Plastics</option>
+        <option>Oil &amp; Gas</option>
+        <option>Energy &amp; Power</option>
+        <option>Renewable Energy</option>
+        <option>Chemicals</option>
+        <option>Agro Commodities</option>
+        <option>Trading &amp; Distribution</option>
+        <option>Manufacturing</option>
+        <option>Engineering &amp; Construction</option>
+        <option>Logistics &amp; Freight</option>
+        <option>Other</option>
+      </select>
+    </label>
+    <label>Product name <span class="hint">(manual entry)</span>
+      <input type="text" name="product_name" placeholder="e.g. Polypropylene (PP)">
+    </label>
+    <label>ID number <span class="hint">(passport / government ID)</span>
+      <input type="text" name="id_number" placeholder="Passport or government ID no.">
+    </label>
+  </div>
+
+  <div class="grid">
+    <label>Current notice period (in days)
+      <input type="text" name="notice_period_days" placeholder="e.g. 30">
+    </label>
+    <label>Expected salary
+      <input type="text" name="expected_salary" placeholder="e.g. 7000">
+    </label>
+    <label>Current salary
+      <input type="text" name="current_salary" placeholder="e.g. 5500">
     </label>
   </div>
 
@@ -196,6 +234,7 @@
     empWrap.style.display = (t === 'ncnda') ? '' : 'none';
     ncndaRow.style.display = (t === 'ncnda') ? '' : 'none';
     payWrap.style.display = (t === 'ncnda') ? 'none' : '';
+    cur.required = (t !== 'ncnda');   // Currency mandatory except for NCNDA (row hidden)
     payLabel.textContent = (t === 'service_agreement') ? 'Service fee (per month)' : 'Salary (per month)';
   }
   docType.addEventListener('change', syncDocType);
