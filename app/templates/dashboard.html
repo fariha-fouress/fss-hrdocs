@@ -16,7 +16,7 @@
     <label>Entity
       <select name="entity" id="entity" required>
         {% for key, label in entities %}
-          <option value="{{ key }}" data-currency="{{ entity_currency[key] }}">{{ label }}</option>
+          <option value="{{ key }}" data-currency="{{ entity_currency[key] }}" data-country="{{ entity_country[key] }}">{{ label }}</option>
         {% endfor %}
       </select>
     </label>
@@ -91,6 +91,11 @@
   <div class="grid">
     <label>Work location
       <input type="text" name="work_location" placeholder="Office / city">
+    </label>
+    <label>Policy location <span class="hint">(sets the Company Policy annexure)</span>
+      <select name="policy_location" id="policy_location">
+        {% for k, l in policy_locations %}<option value="{{ k }}">{{ l }}</option>{% endfor %}
+      </select>
     </label>
     <label>Work arrangement
       <div class="toggle" id="work_toggle">
@@ -178,6 +183,14 @@
   cur.addEventListener('input', () => { cur.dataset.touched = '1'; });
   entity.addEventListener('change', () => { cur.dataset.touched=''; syncCurrency(); });
 
+  const policy = document.getElementById('policy_location');
+  function syncPolicy() {
+    const opt = entity.options[entity.selectedIndex];
+    if (opt && opt.dataset.country && !policy.dataset.touched) policy.value = opt.dataset.country;
+  }
+  policy.addEventListener('change', () => { policy.dataset.touched = '1'; });
+  entity.addEventListener('change', syncPolicy);
+
   function syncDocType() {
     const t = docType.value;
     empWrap.style.display = (t === 'ncnda') ? '' : 'none';
@@ -211,7 +224,7 @@
     if (cb) cb.checked = true;
   });
 
-  syncCurrency(); syncDocType(); syncCustom(); syncSalesAnnex();
+  syncCurrency(); syncPolicy(); syncDocType(); syncCustom(); syncSalesAnnex();
 })();
 </script>
 {% endblock %}

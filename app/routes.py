@@ -14,6 +14,7 @@ from .documents.entities import (entity_choices, get_entity, SIGNATORIES,
                                   ENTITIES, ENTITY_ORDER)
 from .documents import annexures as annex
 from .documents import job_descriptions as jd
+from .documents import policy_handbooks as ph
 from .documents import letterhead as lh
 from .documents.compliance import validate, sanitize
 from .emailer import send_download_notification
@@ -55,10 +56,13 @@ def index():
 @login_required
 def dashboard():
     entity_currency = {k: ENTITIES[k]["currency"] for k in ENTITY_ORDER}
+    entity_country = {k: ENTITIES[k].get("country", "other") for k in ENTITY_ORDER}
     return render_template(
         "dashboard.html",
         entities=entity_choices(),
         entity_currency=entity_currency,
+        entity_country=entity_country,
+        policy_locations=ph.POLICY_LOCATIONS,
         signatories=SIGNATORIES,
         annex_catalogue=annex.ANNEXURE_CATALOGUE,
         jd_groups=jd.grouped_choices(),
@@ -86,6 +90,9 @@ def _parse_form():
         role_val = jd.get_title(jtk) or f.get("role_custom", "").strip()
         resp_html = jd.get_html(jtk)
         job_key = jtk
+    entity_key = f.get("entity")
+    policy_location = f.get("policy_location", "").strip() or (
+        ENTITIES.get(entity_key, {}).get("country", "") if entity_key else "")
     employment = f.get("employment") or (
         "contractor" if doc_type == "service_agreement" else "employee")
     selected = f.getlist("annex")
@@ -99,7 +106,8 @@ def _parse_form():
     annexes = annexes[:5]
     return {
         "doc_type": doc_type,
-        "entity": f.get("entity"),
+        "entity": entity_key,
+        "policy_location": policy_location,
         "candidate": f.get("candidate", "").strip(),
         "role": role_val,
         "job_key": job_key,

@@ -19,6 +19,7 @@ its text ever references Fouress Synergy. A guard in compliance.py enforces this
 SIGNATORIES = {
     "swarit": {"name": "Swarit Srivastava", "designation": "Director"},
     "pooja": {"name": "Pooja Talukdar", "designation": "Director"},
+    "pinky": {"name": "Pinky Shah", "designation": "Human Resources Manager"},
 }
 
 # ---------------------------------------------------------------------------
@@ -27,6 +28,7 @@ SIGNATORIES = {
 ENTITIES = {
     "fss_uae": {
         "key": "fss_uae",
+        "country": "uae",
         "label": "FSS UAE",
         "legal_name": "Fouress Synergy FZC",
         "brand": "fouress",
@@ -53,6 +55,7 @@ ENTITIES = {
     },
     "fss_korea": {
         "key": "fss_korea",
+        "country": "south_korea",
         "label": "FSS Korea",
         "legal_name": "Fouress Synergy LLC, Korea Branch",
         "brand": "fouress",
@@ -78,6 +81,7 @@ ENTITIES = {
     },
     "fss_usa": {
         "key": "fss_usa",
+        "country": "usa",
         "label": "FSS USA",
         "legal_name": "Fouress Synergy LLC",
         "brand": "fouress",
@@ -104,6 +108,7 @@ ENTITIES = {
     },
     "fss_hk": {
         "key": "fss_hk",
+        "country": "hong_kong",
         "label": "FSS HK",
         "legal_name": "Fouress Synergy Trading (HK) Ltd",
         "brand": "fouress",
@@ -129,6 +134,7 @@ ENTITIES = {
     },
     "estel": {
         "key": "estel",
+        "country": "singapore",
         "label": "ESTEL Energy",
         "legal_name": "Estel Energy (SG) Pte. Ltd.",
         "brand": "estel",
@@ -152,9 +158,34 @@ ENTITIES = {
             "Service Provider's separation.</p>"
         ),
     },
+    "estel_usa": {
+        "key": "estel_usa",
+        "country": "usa",
+        "label": "ESTEL USA",
+        "legal_name": "Estel Energy LLC",
+        "brand": "estel",
+        "tagline": "",
+        "is_fouress": False,
+        "address_lines": [
+            "16192 Coastal Highway, Lewes, Delaware 19958, County of Sussex, USA",
+        ],
+        "contact_line": "EIN: 42-4157144  |  admin@estel-energy.com  |  Tel (USA): +1 (984) 338-6942",
+        "currency": "USD",
+        "policy_law_title": "United States — Fair Labor Standards Act (FLSA) & applicable State law",
+        "policy_law_short": "the U.S. Fair Labor Standards Act (FLSA) and the applicable labor law of the State of Delaware",
+        "policy_law_updates": "the Fair Labor Standards Act (FLSA) and applicable State law",
+        "ncnda_governing_law": "the laws of the State of Delaware, United States of America",
+        "ncnda_courts": "the state and federal courts located in the State of Delaware, United States of America",
+        "restricted_territory_html": (
+            "<p><strong>North America:</strong> the United States of America, Canada, and Mexico.</p>"
+            "<p>Together with any additional market in which the Company has demonstrable business "
+            "operations, active client accounts, or active supplier relationships at the date of the "
+            "Service Provider's separation. (Note: non-compete enforceability varies by U.S. state.)</p>"
+        ),
+    },
 }
 
-ENTITY_ORDER = ["fss_usa", "fss_hk", "fss_uae", "fss_korea", "estel"]
+ENTITY_ORDER = ["fss_usa", "fss_hk", "fss_uae", "fss_korea", "estel", "estel_usa"]
 
 
 def get_entity(key):

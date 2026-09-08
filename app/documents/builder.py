@@ -17,6 +17,7 @@ from datetime import date
 
 from .entities import get_entity, get_signatory
 from . import annexures as annex
+from . import policy_handbooks as ph
 from .render_blocks import (editable, locked, esc, h, p, numbered_term,
                             compensation_table, signature_block,
                             acknowledgement_block, ROMAN)
@@ -110,6 +111,8 @@ def _render_annexures(form, ent, person_noun, pay_noun, pay_noun_cap):
         title = a.get("title") or annex.default_title(kind, person_noun == "Service Provider")
         if kind == "responsibilities" and form.get("responsibilities_html"):
             body = a.get("body") or form["responsibilities_html"]
+        elif kind == "policy" and form.get("policy_location"):
+            body = a.get("body") or ph.get_policy_html(form["policy_location"], ctx) or annex.body_html(kind, ctx)
         else:
             body = a.get("body") or annex.body_html(kind, ctx)
         ack = acknowledgement_block(candidate, roman, title, person_noun)

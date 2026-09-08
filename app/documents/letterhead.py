@@ -19,6 +19,7 @@ MASTHEAD_FILE = {
     "fss_uae": "lh_uae.png",
     "fss_korea": "lh_korea.png",
     "estel": "lh_estel.png",
+    "estel_usa": "lh_estel_usa.png",
 }
 
 
