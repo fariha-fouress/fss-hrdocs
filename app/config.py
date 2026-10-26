@@ -19,6 +19,16 @@ def _emails(raw):
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-change-me")
 
+    # --- Session cookie -------------------------------------------------
+    # The app runs inside a Zoho Recruit Web Tab (a cross-origin iframe).
+    # Without SameSite=None (+ Secure) Chrome treats the cookie as Lax and
+    # drops it in the iframe, so sign-in loops back to /login. Partitioned
+    # (CHIPS) keeps it working under Chrome's third-party cookie rules.
+    SESSION_COOKIE_SAMESITE = "None"
+    SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "true").lower() == "true"
+    SESSION_COOKIE_PARTITIONED = True   # CHIPS, for Chrome third-party cookie rules
+    SESSION_COOKIE_HTTPONLY = True
+
     # --- Storage --------------------------------------------------------
     # DATA_DIR holds the SQLite database and uploaded files (letterheads).
     # On Railway, attach a persistent Volume and set DATA_DIR=/data so that

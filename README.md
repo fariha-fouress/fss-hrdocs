@@ -96,6 +96,21 @@ Edit `.env` (see `.env.example`):
   password**) + `MANAGEMENT_EMAILS` to enable download notifications. While
   `EMAIL_ENABLED=false`, downloads still work and the intent is logged.
 
+## Embedding in Zoho Recruit
+
+The app can be added to Zoho Recruit as a Web Tab (it loads in a cross-origin
+iframe). For sign-in to work there:
+
+- Production must be served over **HTTPS** — the session cookie is
+  `SameSite=None; Secure; Partitioned`. Keep `SESSION_COOKIE_SECURE=true`.
+- `AUTH_MODE=zoho` will **not** work inside the iframe, because
+  `accounts.zoho.com` refuses to be framed. Use `AUTH_MODE=password`, or set
+  the Web Tab to open in a new tab.
+- After deploying, clear old cookies for the app (or test in an incognito
+  window) so the browser picks up the new cookie attributes.
+- Production must set `SECRET_KEY` and `LOCAL_PASSWORD` — the code falls back
+  to insecure defaults if they are missing.
+
 ## Test
 
 ```bash

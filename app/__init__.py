@@ -36,4 +36,12 @@ def create_app(config_object=Config):
     def inject_globals():
         return {"auth_mode": app.config["AUTH_MODE"]}
 
+    # allow framing only by ourselves and Zoho (Recruit Web Tab)
+    @app.after_request
+    def set_frame_ancestors(response):
+        response.headers["Content-Security-Policy"] = (
+            "frame-ancestors 'self' https://*.zoho.com https://*.zoho.in"
+        )
+        return response
+
     return app

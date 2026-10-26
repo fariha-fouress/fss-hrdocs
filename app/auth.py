@@ -85,7 +85,10 @@ def login():
             flash("Incorrect password.", "error")
         else:
             _complete_login(email)
-            nxt = request.args.get("next") or url_for("main.dashboard")
+            # only follow local paths, never another host (open redirect)
+            nxt = request.args.get("next") or ""
+            if not nxt.startswith("/") or nxt.startswith("//"):
+                nxt = url_for("main.dashboard")
             return redirect(nxt)
     return render_template("login.html", mode="password")
 
